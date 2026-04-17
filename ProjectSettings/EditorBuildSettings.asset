@@ -11,9 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Menu_Principal.unity
     guid: 20ef2427bf200d14e8916b6c1b32aff8
+  - enabled: 0
+    path: Assets/Scenes/Missiles Definitivo.unity
+    guid: 703b9dd29cdfe874b835049e4485c698
   - enabled: 1
-    path: Assets/Scenes/Missiles.unity
-    guid: 7e9f5328385249b4fbd9f08dfc906a22
+    path: Assets/Scenes/Principal_Missil.unity
+    guid: 93036253c23d12640abdb09eaf791a84
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
