@@ -144,9 +144,9 @@ Transform:
   m_GameObject: {fileID: 129573672}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 2.62, y: -1.28, z: 0}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1502770064}
   - {fileID: 2036847924}
@@ -209,6 +209,10 @@ PrefabInstance:
     - target: {fileID: 1791786188782878957, guid: 62c2526aac4349540a86e7adc4f5f09f, type: 3}
       propertyPath: m_Name
       value: City (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1791786188782878957, guid: 62c2526aac4349540a86e7adc4f5f09f, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -276,6 +280,10 @@ PrefabInstance:
     - target: {fileID: 1791786188782878957, guid: 62c2526aac4349540a86e7adc4f5f09f, type: 3}
       propertyPath: m_Name
       value: City (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1791786188782878957, guid: 62c2526aac4349540a86e7adc4f5f09f, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -561,6 +569,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 891857015}
   m_CullTransparentMesh: 1
+--- !u!1 &1096915541
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1096915542}
+  - component: {fileID: 1096915544}
+  - component: {fileID: 1096915543}
+  m_Layer: 5
+  m_Name: Overlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1096915542
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1096915541}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1925078709}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1096915543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1096915541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 4116912107018486647, guid: f224e2e9bedeb0c4c8b40ad73fc217e4, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1096915544
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1096915541}
+  m_CullTransparentMesh: 1
 --- !u!1001 &1299233477
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -613,6 +696,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: City (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1791786188782878957, guid: 62c2526aac4349540a86e7adc4f5f09f, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -649,8 +736,8 @@ Transform:
   m_GameObject: {fileID: 1502770063}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.15, y: -4.62, z: 0}
-  m_LocalScale: {x: 18.174595, y: 1, z: 1}
+  m_LocalPosition: {x: -0.1496, y: -4.6212, z: 0}
+  m_LocalScale: {x: 17.93856, y: 1.0024128, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 129573673}
@@ -998,6 +1085,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: City (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 1791786188782878957, guid: 62c2526aac4349540a86e7adc4f5f09f, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1076,8 +1167,8 @@ Canvas:
   m_GameObject: {fileID: 1925078705}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_RenderMode: 1
+  m_Camera: {fileID: 1558350644}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -1102,6 +1193,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1096915542}
   - {fileID: 891857016}
   - {fileID: 842484519}
   - {fileID: 1983894706}
@@ -1296,6 +1388,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2036869667}
   - component: {fileID: 2036869668}
+  - component: {fileID: 2036869669}
   m_Layer: 0
   m_Name: EnemyMissileSpawner
   m_TagString: Untagged
@@ -1325,7 +1418,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2036869666}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc0d0748088c8a64ca6b778fae48abe5, type: 3}
   m_Name: 
@@ -1334,6 +1427,25 @@ MonoBehaviour:
   Ypadding: 0.5
   missilesToSpawnThisRound: 10
   delayBetweenMissiles: 0.5
+--- !u!114 &2036869669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2036869666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf8df5ddd4b1b7e49ba581e1343106a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NewMonoBehaviousScript
+  missilePrefab: {fileID: 2151505837289263774, guid: f5153aec5bc58fb498a44164b5c32de3, type: 3}
+  Ypadding: 0.5
+  minX: 0
+  maxX: 0
+  missilesToSpawnThisRound: 10
+  delayBetweenMissiles: 0.5
+  yValue: 0
 --- !u!1001 &2063941956
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1385,6 +1497,10 @@ PrefabInstance:
     - target: {fileID: 1791786188782878957, guid: 62c2526aac4349540a86e7adc4f5f09f, type: 3}
       propertyPath: m_Name
       value: City (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1791786188782878957, guid: 62c2526aac4349540a86e7adc4f5f09f, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1459,6 +1575,10 @@ PrefabInstance:
     - target: {fileID: 6501459528752047175, guid: a992c272e8ed6e74b9b438bfee1c3d4d, type: 3}
       propertyPath: m_Name
       value: MissileLauncher
+      objectReference: {fileID: 0}
+    - target: {fileID: 6501459528752047175, guid: a992c272e8ed6e74b9b438bfee1c3d4d, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1586,6 +1706,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: City
       objectReference: {fileID: 0}
+    - target: {fileID: 1791786188782878957, guid: 62c2526aac4349540a86e7adc4f5f09f, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1597,7 +1721,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 1558350645}
   - {fileID: 129573673}
-  - {fileID: 2036869667}
   - {fileID: 1925078709}
+  - {fileID: 2036869667}
   - {fileID: 2138852727735825913}
   - {fileID: 1538505593}
