@@ -106,8 +106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ab3af59eef799446b858123c3d33107, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  speed: 0.5
-  explosionPrefab: {fileID: 4159878286275772821, guid: a0706858313e69441a5272da09f3957d, type: 3}
+  speed: 1
 --- !u!58 &-429784215340545600
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -138,7 +137,7 @@ CircleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0

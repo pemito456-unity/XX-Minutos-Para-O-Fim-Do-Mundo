@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a7733bc3e9dadc447aeb2f497fa8995c
+guid: eb44f89010adcf946ac4411a6ec17237
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6525571151639153614
-    second: "barra de press\xE3o_0"
+      213: 6081691661847848310
+    second: game over botao_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -96,17 +96,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "barra de press\xE3o_0"
+      name: game over botao_0
       rect:
         serializedVersion: 2
-        x: 37
-        y: 17
-        width: 1218
-        height: 98
+        x: 6
+        y: 4
+        width: 452
+        height: 142
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 234f20e8c938075a0800000000000000
-      internalID: -6525571151639153614
+      spriteID: 67565e12852866450800000000000000
+      internalID: 6081691661847848310
       vertices: []
       indices: 
       edges: []
@@ -135,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "barra de press\xE3o_0": -6525571151639153614
+      game over botao_0: 6081691661847848310
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

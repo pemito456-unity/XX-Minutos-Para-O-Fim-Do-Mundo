@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1618681171927044965}
   - component: {fileID: 6078600178679413094}
   - component: {fileID: 581719203583181990}
+  - component: {fileID: 3819253299857874994}
   m_Layer: 0
   m_Name: City
   m_TagString: Defenders
@@ -138,3 +139,16 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2.4267626, y: 2.410381}
   m_EdgeRadius: 0
+--- !u!114 &3819253299857874994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791786188782878957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd665a10d19f83c4b897d2917962fe14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CityScript
+  hitsToDestroy: 1
