@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb3f5ff6b5fadc448a6545d333ba265, type: 3}
+  m_Name: Coronel_3
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  speakerName: Coronel
+  speakerType: 0
+  speakerPortrait: {fileID: 7597935454189737829, guid: 184d36dd661ff3e4b9fc015f6ced2ea4, type: 3}
+  dialogueText: "General Alastair, o que est\xE1 acontecendo? De onde est\xE3o vindo
+    estes m\xEDsseis?"
+  isMandatory: 0
+  timeToDecide: 15
+  choices:
+  - buttonText: "N\xE3o sabemos ainda, mas eles foram detectados em \xF3rbita alta."
+    pressureChange: 0
+    advancesInvestigation: 0
+    speakerReaction: "Isso \xE9 de se esperar de m\xEDsseis intercontinentais. Confirme
+      o que est\xE1 acontecendo imediatamente."
+    animationTrigger: 
+    reactionSound: {fileID: 0}
+    screenFlashColor: {r: 0, g: 0, b: 0, a: 0}
+    screenFlashDuration: 0
+    spawnRateModifier: 0
+    extraDefenderDamage: 0
+  - buttonText: Sabemos apenas que vieram do norte do planeta.
+    pressureChange: 10
+    advancesInvestigation: 0
+    speakerReaction: "Do norte? Isso s\xF3 pode significar que sobrevoaram as calotas
+      polares vindo da Uni\xE3o Sovi\xE9tica!"
+    animationTrigger: 
+    reactionSound: {fileID: 0}
+    screenFlashColor: {r: 0, g: 0, b: 0, a: 0}
+    screenFlashDuration: 0
+    spawnRateModifier: 0
+    extraDefenderDamage: 0
+  - buttonText: "Dados do sistema n\xE3o condizem com meros m\xEDsseis, creio que
+      se trate de detec\xE7\xF5es falsas"
+    pressureChange: 0
+    advancesInvestigation: 0
+    speakerReaction: "Imposs\xEDvel! Um sistema de 20 bilh\xF5es de d\xF3lares n\xE3o
+      foi feito para falhar. Sendo a amea\xE7a real ou imagin\xE1ria, n\xE3o deixe
+      nenhum desses 'objetos' atingir o solo americano!"
+    animationTrigger: 
+    reactionSound: {fileID: 0}
+    screenFlashColor: {r: 0, g: 0, b: 0, a: 0}
+    screenFlashDuration: 0
+    spawnRateModifier: 0
+    extraDefenderDamage: 0
+  dialogueStartClip: {fileID: 0}
+  speakerVoiceClip: {fileID: 0}

@@ -1422,7 +1422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 907a2bc097e5f814abdef5a5b2db8352, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuController
-  proximaCena: Principal_Missil
+  proximaCena: 2ComputerIntro
   painelPrincipal: {fileID: 255661500}
   painelCreditos: {fileID: 439798777}
 --- !u!1 &1692178274

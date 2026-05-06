@@ -10,7 +10,10 @@ public class EnemyMissileSpawner_Def : MonoBehaviour
     [SerializeField] private float excludeXMin = -8.36f;
     [SerializeField] private float excludeXMax = -3.35f;
 
-    private float minX, maxX, yValue;
+    [Header("Configuração de Spawn")]
+    [SerializeField] private float spawnY = -2f; // 🔴 VALOR MAIS BAIXO (negativo)
+
+    private float minX, maxX;
     public float delayBetweenMissiles = 1.5f;
     private GameController_Def gameController;
 
@@ -18,13 +21,12 @@ public class EnemyMissileSpawner_Def : MonoBehaviour
     {
         Debug.Log("Awake: Iniciando Spawner");
         
-        minX = Camera.main.ViewportToWorldPoint(new Vector3(0, 1, 0)).x;
-        maxX = Camera.main.ViewportToWorldPoint(new Vector3(1, 1, 0)).x;
-        yValue = Camera.main.ViewportToWorldPoint(new Vector3(0, 1, 0)).y;
+        // Calcula os limites X da câmera
+        minX = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0)).x;
+        maxX = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
         
-        Debug.Log($"minX: {minX}, maxX: {maxX}, yValue: {yValue}");
+        Debug.Log($"minX: {minX}, maxX: {maxX}, spawnY: {spawnY}");
         
-        // TUDO que estava no Start vai para o Awake
         gameController = Object.FindAnyObjectByType<GameController_Def>();
         Debug.Log($"GameController encontrado? {gameController != null}");
         
@@ -37,7 +39,6 @@ public class EnemyMissileSpawner_Def : MonoBehaviour
             Debug.Log("MissilePrefab atribuído corretamente");
         }
         
-        // Inicia a corrotina IMEDIATAMENTE
         StartCoroutine(SpawnMissilesLoop());
     }
 
@@ -52,25 +53,17 @@ public class EnemyMissileSpawner_Def : MonoBehaviour
         
         while (true) 
         {
-            Debug.Log($"Esperando {delayBetweenMissiles} segundos...");
             yield return new WaitForSeconds(delayBetweenMissiles);
-            
-            Debug.Log($"Verificando estado: gameController null? {gameController == null}, estado: {gameController?.currentState}");
             
             if (gameController != null && gameController.currentState == GameController_Def.GameState.Gameplay)
             {
                 float spawnX = GetRandomXExcludingInterface();
-                Vector3 spawnPosition = new Vector3(spawnX, yValue + Ypadding, 0);
+                Vector3 spawnPosition = new Vector3(spawnX, spawnY + Ypadding, 0);
 
                 if (missilePrefab != null) 
                 {
-                    GameObject newMissile = Instantiate(missilePrefab, spawnPosition, Quaternion.identity);
-                    Debug.Log($"MÍSSIL SPAWNADO em X: {spawnX}");
+                    Instantiate(missilePrefab, spawnPosition, Quaternion.identity);
                 }
-            }
-            else
-            {
-                Debug.Log("Condição não atendida para spawnar");
             }
         }
     }

@@ -46,3 +46,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   missilePrefab: {fileID: 2151505837289263774, guid: f5153aec5bc58fb498a44164b5c32de3, type: 3}
   Ypadding: 0.5
+  excludeXMin: -8.36
+  excludeXMax: -3.35
+  delayBetweenMissiles: 2.5

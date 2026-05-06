@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb3f5ff6b5fadc448a6545d333ba265, type: 3}
+  m_Name: CoronelTroll_1
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  speakerName: Coronel
+  speakerType: 0
+  speakerPortrait: {fileID: 7597935454189737829, guid: 184d36dd661ff3e4b9fc015f6ced2ea4, type: 3}
+  dialogueText: "General, nossos sensores detectaram movimenta\xE7\xE3o incomum em
+    alguns silos sovi\xE9ticos h\xE1 poucos minutos. O que voc\xEA acha que isso
+    significa?"
+  isMandatory: 0
+  timeToDecide: 15
+  choices:
+  - buttonText: "Isso \xE9 altamente suspeito. Devemos considerar como poss\xEDvel
+      prepara\xE7\xE3o de ataque."
+    pressureChange: 10
+    advancesInvestigation: 0
+    speakerReaction: "Concordo plenamente. Vou colocar as equipes de planejamento
+      em a\xE7\xE3o agora mesmo."
+    animationTrigger: 
+    reactionSound: {fileID: 0}
+    screenFlashColor: {r: 0, g: 0, b: 0, a: 0}
+    screenFlashDuration: 0
+    spawnRateModifier: 0
+    extraDefenderDamage: 0
+  - buttonText: "Pode ser coincid\xEAncia, mas n\xE3o podemos descartar que a URSS
+      esteja se preparando para se aproveitar do caos."
+    pressureChange: 0
+    advancesInvestigation: 0
+    speakerReaction: "Vigil\xE2ncia m\xE1xima\u2026 Certo. Vou ver o que consigo
+      fazer com isso."
+    animationTrigger: 
+    reactionSound: {fileID: 0}
+    screenFlashColor: {r: 0, g: 0, b: 0, a: 0}
+    screenFlashDuration: 0
+    spawnRateModifier: 0
+    extraDefenderDamage: 0
+  - buttonText: "Movimenta\xE7\xE3o em silos n\xE3o significa prepara\xE7\xE3o de
+      lan\xE7amento. N\xE3o tire conclus\xF5es precipitadas."
+    pressureChange: -10
+    advancesInvestigation: 0
+    speakerReaction: "Com todo respeito, General\u2026 se ignorarmos isso e estivermos
+      errados, n\xE3o vai sobrar ningu\xE9m para julgar nossa cautela."
+    animationTrigger: 
+    reactionSound: {fileID: 0}
+    screenFlashColor: {r: 0, g: 0, b: 0, a: 0}
+    screenFlashDuration: 0
+    spawnRateModifier: 0
+    extraDefenderDamage: 0
+  dialogueStartClip: {fileID: 0}
+  speakerVoiceClip: {fileID: 0}
