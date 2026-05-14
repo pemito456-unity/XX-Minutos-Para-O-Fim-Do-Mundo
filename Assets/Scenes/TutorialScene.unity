@@ -2929,21 +2929,31 @@ MonoBehaviour:
   m_GameObject: {fileID: 2140442999}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 474c78b54797a3b4fa414478ac502da2, type: 3}
+  m_Script: {fileID: 11500000, guid: e8a044c8fccaff24a9f3ef4835ee112e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TutorialController
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialController2
   meteorosNaOnda: 10
   tempoEntreMeteoros: 1.5
-  velocidadeMeteoros: 0.5
-  spawner: {fileID: 2036869668}
-  gameController: {fileID: 681989169}
-  dialogueManager: {fileID: 0}
+  velocidadeMeteoros: 2
+  spawner: {fileID: 0}
+  gameController: {fileID: 0}
   tutorialPanel: {fileID: 0}
   tutorialText: {fileID: 0}
   continuarButton: {fileID: 0}
-  dialogoIntroducao: {fileID: 11400000, guid: 70a811a92f7f5cc469dd73c60ab07f0d, type: 2}
-  dialogoPressao: {fileID: 11400000, guid: f9b3f26dbfd566248b37a7ad04b84e9d, type: 2}
-  dialogoFinal: {fileID: 11400000, guid: ee20f24a2f70d9b47925c1b6020b91b9, type: 2}
+  dialoguePanel: {fileID: 0}
+  speakerPortraitImage: {fileID: 0}
+  speakerNameText: {fileID: 0}
+  dialogueText: {fileID: 0}
+  choiceButton1: {fileID: 0}
+  choiceButton2: {fileID: 0}
+  choiceButton3: {fileID: 0}
+  choiceText1: {fileID: 0}
+  choiceText2: {fileID: 0}
+  choiceText3: {fileID: 0}
+  dialogoIntroducao: {fileID: 0}
+  dialogoPressao: {fileID: 0}
+  dialogoFinal: {fileID: 0}
+  reactionTime: 2
 --- !u!222 &96699407888619356
 CanvasRenderer:
   m_ObjectHideFlags: 0

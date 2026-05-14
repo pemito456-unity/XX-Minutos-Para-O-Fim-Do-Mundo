@@ -2,14 +2,23 @@ using UnityEngine;
 
 public class TutorialMissile : MonoBehaviour
 {
-    private TutorialController controller;
+    private System.Action onDestroy;
+    private System.Action onHitGround;
     private float speed;
     private bool isDestroyed = false;
     
-    public void Inicializar(TutorialController tutorialController, float velocidade)
+    public void Inicializar(System.Action destroyCallback, System.Action hitGroundCallback, float velocidade)
     {
-        controller = tutorialController;
+        onDestroy = destroyCallback;
+        onHitGround = hitGroundCallback;
         speed = velocidade;
+        
+        // Garante que tenha um collider
+        if (GetComponent<Collider2D>() == null)
+        {
+            CircleCollider2D collider = gameObject.AddComponent<CircleCollider2D>();
+            collider.radius = 0.4f;
+        }
     }
     
     void Update()
@@ -19,8 +28,8 @@ public class TutorialMissile : MonoBehaviour
         if (transform.position.y < -5f && !isDestroyed)
         {
             isDestroyed = true;
-            if (controller != null)
-                controller.RegistrarMeteoroAcertou(gameObject);
+            if (onHitGround != null)
+                onHitGround.Invoke();
             Destroy(gameObject);
         }
     }
@@ -30,9 +39,8 @@ public class TutorialMissile : MonoBehaviour
         if (!isDestroyed)
         {
             isDestroyed = true;
-            if (controller != null)
-                controller.RegistrarMeteoroDestruido(gameObject);
-            
+            if (onDestroy != null)
+                onDestroy.Invoke();
             Destroy(gameObject);
         }
     }

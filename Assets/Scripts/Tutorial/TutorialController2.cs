@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 
-public class TutorialController : MonoBehaviour
+public class TutorialController2 : MonoBehaviour
 {
-    [Header("Configurações")]
+    [Header("Configurações do Tutorial")]
     [SerializeField] private int meteorosNaOnda = 10;
     [SerializeField] private float tempoEntreMeteoros = 1.5f;
     [SerializeField] private float velocidadeMeteoros = 2f;
@@ -14,23 +14,45 @@ public class TutorialController : MonoBehaviour
     [Header("Referências")]
     [SerializeField] private EnemyMissileSpawner_Def spawner;
     [SerializeField] private GameController_Def gameController;
-    [SerializeField] private DialogueUITutorial dialogueManager;
     
     [Header("UI do Tutorial")]
     [SerializeField] private GameObject tutorialPanel;
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private Button continuarButton;
     
+    [Header("Diálogos do Tutorial (mesma UI)")]
+    [SerializeField] private GameObject dialoguePanel;
+    [SerializeField] private Image speakerPortraitImage;
+    [SerializeField] private TextMeshProUGUI speakerNameText;
+    [SerializeField] private TextMeshProUGUI dialogueText;
+    
+    [Header("Botões de Diálogo (3 opções)")]
+    [SerializeField] private Button choiceButton1;
+    [SerializeField] private Button choiceButton2;
+    [SerializeField] private Button choiceButton3;
+    [SerializeField] private TextMeshProUGUI choiceText1;
+    [SerializeField] private TextMeshProUGUI choiceText2;
+    [SerializeField] private TextMeshProUGUI choiceText3;
+    
     [Header("Diálogos do Tutorial")]
     [SerializeField] private DialogueData dialogoIntroducao;
     [SerializeField] private DialogueData dialogoPressao;
     [SerializeField] private DialogueData dialogoFinal;
     
+    [Header("Configurações")]
+    [SerializeField] private float reactionTime = 2f;
+    
+    // Controle do tutorial
     private int meteorosDestruidos = 0;
     private int meteorosAcertaram = 0;
     private bool tutorialEmAndamento = true;
     private bool ondaEmAndamento = false;
     private List<GameObject> meteorosAtivos = new List<GameObject>();
+    
+    // Controle de diálogo
+    private DialogueData currentDialogue;
+    private bool isDialogueActive = false;
+    private System.Action onDialogueComplete;
     
     void Start()
     {
@@ -48,13 +70,39 @@ public class TutorialController : MonoBehaviour
             gameController.currentState = GameController_Def.GameState.Dialogue;
         }
         
+        if (dialoguePanel != null)
+            dialoguePanel.SetActive(false);
+        
         if (tutorialPanel != null)
             tutorialPanel.SetActive(true);
+        
+        SetupDialogueButtons();
         
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         
         Time.timeScale = 0f;
+    }
+    
+    void SetupDialogueButtons()
+    {
+        if (choiceButton1 != null)
+        {
+            choiceButton1.onClick.RemoveAllListeners();
+            choiceButton1.onClick.AddListener(() => OnDialogueButtonClick(0));
+        }
+        
+        if (choiceButton2 != null)
+        {
+            choiceButton2.onClick.RemoveAllListeners();
+            choiceButton2.onClick.AddListener(() => OnDialogueButtonClick(1));
+        }
+        
+        if (choiceButton3 != null)
+        {
+            choiceButton3.onClick.RemoveAllListeners();
+            choiceButton3.onClick.AddListener(() => OnDialogueButtonClick(2));
+        }
     }
     
     IEnumerator RunTutorial()
@@ -80,7 +128,7 @@ public class TutorialController : MonoBehaviour
         
         bool dialogoCompleto = false;
         
-        dialogueManager.ShowDialogue(dialogo, () => {
+        ShowDialogue(dialogo, () => {
             dialogoCompleto = true;
         });
         
@@ -90,6 +138,132 @@ public class TutorialController : MonoBehaviour
         }
         
         yield return new WaitForSecondsRealtime(0.5f);
+    }
+    
+    public void ShowDialogue(DialogueData dialogue, System.Action onComplete = null)
+    {
+        if (dialogue == null)
+        {
+            Debug.LogError("Diálogo é null!");
+            if (onComplete != null) onComplete.Invoke();
+            return;
+        }
+        
+        currentDialogue = dialogue;
+        onDialogueComplete = onComplete;
+        
+        StartCoroutine(StartDialogueCoroutine());
+    }
+    
+    IEnumerator StartDialogueCoroutine()
+    {
+        isDialogueActive = true;
+        
+        if (dialoguePanel != null)
+            dialoguePanel.SetActive(true);
+        
+        if (speakerPortraitImage != null && currentDialogue.speakerPortrait != null)
+        {
+            speakerPortraitImage.sprite = currentDialogue.speakerPortrait;
+            speakerPortraitImage.gameObject.SetActive(true);
+        }
+        
+        if (speakerNameText != null)
+            speakerNameText.text = currentDialogue.speakerName;
+        
+        if (dialogueText != null)
+            dialogueText.text = currentDialogue.dialogueText;
+        
+        CreateDialogueButtons(currentDialogue.choices);
+        
+        Debug.Log($"📖 Tutorial - {currentDialogue.speakerName}: {currentDialogue.dialogueText}");
+        
+        yield return null;
+    }
+    
+    void CreateDialogueButtons(List<DialogueChoice> choices)
+    {
+        HideAllChoiceButtons();
+        
+        int choiceCount = Mathf.Min(choices.Count, 3);
+        
+        if (choiceCount >= 1 && choiceButton1 != null)
+        {
+            choiceButton1.gameObject.SetActive(true);
+            if (choiceText1 != null) choiceText1.text = choices[0].buttonText;
+        }
+        
+        if (choiceCount >= 2 && choiceButton2 != null)
+        {
+            choiceButton2.gameObject.SetActive(true);
+            if (choiceText2 != null) choiceText2.text = choices[1].buttonText;
+        }
+        
+        if (choiceCount >= 3 && choiceButton3 != null)
+        {
+            choiceButton3.gameObject.SetActive(true);
+            if (choiceText3 != null) choiceText3.text = choices[2].buttonText;
+        }
+    }
+    
+    void HideAllChoiceButtons()
+    {
+        if (choiceButton1 != null) choiceButton1.gameObject.SetActive(false);
+        if (choiceButton2 != null) choiceButton2.gameObject.SetActive(false);
+        if (choiceButton3 != null) choiceButton3.gameObject.SetActive(false);
+    }
+    
+    public void OnDialogueButtonClick(int buttonIndex)
+    {
+        if (!isDialogueActive) return;
+        
+        if (currentDialogue != null && buttonIndex < currentDialogue.choices.Count)
+        {
+            StartCoroutine(ShowReactionAndClose(currentDialogue.choices[buttonIndex]));
+        }
+    }
+    
+    IEnumerator ShowReactionAndClose(DialogueChoice choice)
+    {
+        HideAllChoiceButtons();
+        
+        string originalSpeakerName = speakerNameText.text;
+        string originalDialogueText = dialogueText.text;
+        
+        if (!string.IsNullOrEmpty(choice.speakerReaction))
+        {
+            speakerNameText.text = currentDialogue.speakerName;
+            dialogueText.text = choice.speakerReaction;
+        }
+        else
+        {
+            speakerNameText.text = "???";
+            dialogueText.text = "...";
+        }
+        
+        yield return new WaitForSecondsRealtime(reactionTime);
+        
+        speakerNameText.text = originalSpeakerName;
+        dialogueText.text = originalDialogueText;
+        
+        CloseDialogue();
+    }
+    
+    void CloseDialogue()
+    {
+        if (dialoguePanel != null)
+            dialoguePanel.SetActive(false);
+        
+        isDialogueActive = false;
+        
+        if (onDialogueComplete != null)
+        {
+            onDialogueComplete.Invoke();
+            onDialogueComplete = null;
+        }
+        
+        currentDialogue = null;
+        HideAllChoiceButtons();
     }
     
     IEnumerator ExplicarMeteoros()
@@ -141,8 +315,8 @@ public class TutorialController : MonoBehaviour
         Vector3 posicao = new Vector3(randomX, 6f, 0);
         
         GameObject meteoro = new GameObject("TutorialMeteoro");
+        meteoro.transform.position = posicao;
         meteoro.tag = "EnemyMissile";
-        meteorosAtivos.Add(meteoro);
         
         SpriteRenderer sr = meteoro.AddComponent<SpriteRenderer>();
         sr.sprite = CreateCircleSprite();
@@ -150,12 +324,16 @@ public class TutorialController : MonoBehaviour
         sr.transform.localScale = Vector3.one * 0.5f;
         
         CircleCollider2D collider = meteoro.AddComponent<CircleCollider2D>();
-        collider.radius = 0.3f;
+        collider.radius = 0.4f;
         
-        TutorialMissile missileScript = meteoro.AddComponent<TutorialMissile>();
-        missileScript.Inicializar(this, velocidadeMeteoros);
+        TutorialMissile missile = meteoro.AddComponent<TutorialMissile>();
+        missile.Inicializar(
+            () => RegistrarMeteoroDestruido(meteoro),
+            () => RegistrarMeteoroAcertou(meteoro),
+            velocidadeMeteoros
+        );
         
-        meteoro.transform.position = posicao;
+        meteorosAtivos.Add(meteoro);
     }
     
     Sprite CreateCircleSprite()
@@ -186,11 +364,14 @@ public class TutorialController : MonoBehaviour
         ondaEmAndamento = false;
     }
     
+    // 🔴 FUNÇÕES PARA REGISTRAR METEOROS
     public void RegistrarMeteoroDestruido(GameObject meteoro)
     {
         meteorosDestruidos++;
         if (meteorosAtivos.Contains(meteoro))
             meteorosAtivos.Remove(meteoro);
+        
+        Debug.Log($"💥 Meteoro destruído! ({meteorosDestruidos}/{meteorosNaOnda})");
     }
     
     public void RegistrarMeteoroAcertou(GameObject meteoro)
@@ -198,6 +379,8 @@ public class TutorialController : MonoBehaviour
         meteorosAcertaram++;
         if (meteorosAtivos.Contains(meteoro))
             meteorosAtivos.Remove(meteoro);
+        
+        Debug.Log($"💔 Meteoro acertou o chão! ({meteorosAcertaram}/{meteorosNaOnda})");
     }
     
     IEnumerator ResultadoOnda()
@@ -246,4 +429,12 @@ public class TutorialController : MonoBehaviour
         
         Time.timeScale = 0f;
     }
+    
+    public void ForceCloseDialogue()
+    {
+        StopAllCoroutines();
+        CloseDialogue();
+    }
+    
+    public bool IsDialogueActive() => isDialogueActive;
 }
