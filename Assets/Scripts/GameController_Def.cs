@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine.SceneManagement; // 🔴 Adicionado para gerenciar cenas
+using UnityEngine.SceneManagement;
 
 public class GameController_Def : MonoBehaviour
 {
@@ -9,23 +9,34 @@ public class GameController_Def : MonoBehaviour
     public GameState currentState;
 
     [Header("Sistema de Pressão")]
-    [SerializeField] private float currentPressure = 0f;
     [SerializeField] private float maxPressure = 100f;
+    private float redPressure = 0f; 
+    private float yellowPressure = 0f; 
     
-    [Header("Progressão da História (Vitória)")]
+    [Header("UI de Pressão")]
+    [SerializeField] private TextMeshProUGUI redPressureText;
+    [SerializeField] private TextMeshProUGUI yellowPressureText;
+    [SerializeField] private GameObject pressurePanel;
+    
+    [Header("Progressão da História")]
     [SerializeField] private int requiredInvestigationProgress = 3;
     private int currentInvestigationProgress = 0;
     
     [Header("UI")]
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private GameObject victoryPanel;
-    [SerializeField] private GameObject sceneImages; // 🔴 Referência ao SceneImages
+    [SerializeField] private GameObject sceneImages;
     
     [Header("Configuração de Cenas")]
     [SerializeField] private string mainGameScene = "MainGame";
     [SerializeField] private string mainMenuScene = "MainMenu";
     
-    // Lista de defensores vivos
+    public float GetRedPressurePercent() => redPressure / maxPressure;
+    public float GetYellowPressurePercent() => yellowPressure / maxPressure;
+    public float GetTotalPressurePercent() => (redPressure + yellowPressure) / maxPressure;
+    
+    public float GetPressurePercent() => GetTotalPressurePercent();
+    
     private List<GameObject> activeDefenders = new List<GameObject>();
     private int totalDefendersCount = 0;
 
@@ -33,14 +44,16 @@ public class GameController_Def : MonoBehaviour
     {
         Time.timeScale = 1f;
         currentState = GameState.Gameplay;
-        currentPressure = 0f;
+        redPressure = 0f;
+        yellowPressure = 0f;
         currentInvestigationProgress = 0;
         
         if(gameOverPanel) gameOverPanel.SetActive(false);
         if(victoryPanel) victoryPanel.SetActive(false);
         
         RegisterAllDefenders();
-        Debug.Log("GameController iniciado. Vitória requer progresso: " + requiredInvestigationProgress);
+        UpdatePressureUI();
+        Debug.Log($"GameController iniciado. Pressão máx: {maxPressure}");
     }
 
     void Update()
@@ -48,6 +61,19 @@ public class GameController_Def : MonoBehaviour
         if (currentState == GameState.Gameplay)
         {
             CheckLoseConditions();
+        }
+    }
+    
+    private void UpdatePressureUI()
+    {
+        if (redPressureText != null)
+        {
+            redPressureText.text = $"DESTRUIÇÃO: {redPressure:F0}/{maxPressure}";
+        }
+        
+        if (yellowPressureText != null)
+        {
+            yellowPressureText.text = $"POLÍTICA: {yellowPressure:F0}/{maxPressure}";
         }
     }
     
@@ -59,26 +85,43 @@ public class GameController_Def : MonoBehaviour
         totalDefendersCount = activeDefenders.Count;
         Debug.Log($"Registrados {totalDefendersCount} defensores");
     }
+
+    public void AddRedPressure(float amount)
+    {
+        redPressure = Mathf.Clamp(redPressure + amount, 0, maxPressure);
+        UpdatePressureUI();
+        Debug.Log($"🔴 PRESSÃO VERMELHA: +{amount} → {redPressure:F1}/{maxPressure}");
+        CheckLoseConditions();
+    }
+    
+    public void AddYellowPressure(float amount)
+    {
+        yellowPressure = Mathf.Clamp(yellowPressure + amount, 0, maxPressure);
+        UpdatePressureUI();
+        string arrow = amount > 0 ? "↑" : "↓";
+        Debug.Log($"🟡 PRESSÃO AMARELA: {arrow}{Mathf.Abs(amount)} → {yellowPressure:F1}/{maxPressure}");
+        CheckLoseConditions();
+    }
+
+    public void ModifyPressureByDialogue(float amount)
+    {
+        AddYellowPressure(amount);
+    }
     
     public void OnDefenderDestroyed(GameObject destroyedDefender)
     {
-        Debug.Log($"OnDefenderDestroyed chamado para: {destroyedDefender.name}");
-        
         if (activeDefenders.Contains(destroyedDefender))
         {
             activeDefenders.Remove(destroyedDefender);
-            Debug.Log($"Defensor removido. Restam: {activeDefenders.Count}/{totalDefendersCount}");
             
             int destroyedCount = totalDefendersCount - activeDefenders.Count;
             float destructionPercent = (float)destroyedCount / totalDefendersCount;
-            currentPressure = destructionPercent * maxPressure;
-            currentPressure = Mathf.Clamp(currentPressure, 0, maxPressure);
             
-            Debug.Log($"PRESSURE ATUALIZADA: {currentPressure}/{maxPressure} ({destructionPercent * 100}% destruído)");
-        }
-        else
-        {
-            Debug.LogWarning($"Destroyed {destroyedDefender.name} não estava na lista de defensores!");
+            redPressure = destructionPercent * maxPressure;
+            redPressure = Mathf.Clamp(redPressure, 0, maxPressure);
+            UpdatePressureUI();
+            
+            Debug.Log($" Prédio destruído! {destroyedCount}/{totalDefendersCount}. Pressão Vermelha: {redPressure:F1}/{maxPressure}");
         }
     }
     
@@ -95,7 +138,7 @@ public class GameController_Def : MonoBehaviour
     public void AdvanceInvestigation()
     {
         currentInvestigationProgress++;
-        Debug.Log($"Investigação progrediu: {currentInvestigationProgress}/{requiredInvestigationProgress}");
+        Debug.Log($"Investigação: {currentInvestigationProgress}/{requiredInvestigationProgress}");
         
         if (currentInvestigationProgress >= requiredInvestigationProgress)
         {
@@ -103,24 +146,12 @@ public class GameController_Def : MonoBehaviour
         }
     }
     
-    public void ModifyPressureByDialogue(float amount)
-    {
-        currentPressure += amount;
-        currentPressure = Mathf.Clamp(currentPressure, 0, maxPressure);
-        Debug.Log($"Diálogo alterou pressão em {amount}. Pressão atual: {currentPressure}");
-        
-        // Verifica game over imediatamente após a mudança
-        if (currentPressure >= maxPressure && currentState == GameState.Gameplay)
-        {
-            TriggerGameOver();
-        }
-    }
-    
     private void CheckLoseConditions()
     {
-        if (currentPressure >= maxPressure)
+        float totalPressure = redPressure + yellowPressure;
+        if (totalPressure >= maxPressure)
         {
-            Debug.Log($"GAME OVER: Pressão {currentPressure} >= {maxPressure}");
+            Debug.Log($"GAME OVER: Pressão total {totalPressure:F1} >= {maxPressure}");
             TriggerGameOver();
         }
     }
@@ -131,43 +162,16 @@ public class GameController_Def : MonoBehaviour
         currentState = GameState.GameOver;
         Time.timeScale = 0f;
         
-        // 🔴 Desativa o SceneImages
-        if (sceneImages != null)
-        {
-            sceneImages.SetActive(false);
-            Debug.Log("SceneImages desativado no Game Over");
-        }
+        if (sceneImages != null) sceneImages.SetActive(false);
+        if (pressurePanel != null) pressurePanel.SetActive(false);
+        if (gameOverPanel != null) gameOverPanel.SetActive(true);
         
-        // Ativa o painel de Game Over
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(true);
-            Debug.Log("GameOverPanel ativado");
-        }
-        
-        Debug.Log("GAME OVER - Pressão máxima atingida!");
-    }
-
-    public void TriggerVictory()
-    {
-        if (currentState == GameState.Victory) return;
-        currentState = GameState.Victory;
-        Time.timeScale = 0f;
-        
-        if (victoryPanel != null)
-        {
-            victoryPanel.SetActive(true);
-        }
-        
-        Debug.Log("VITÓRIA - Investigação completa! Meteoros identificados, guerra evitada!");
+        Debug.Log("💀 GAME OVER!");
     }
     
-    public float GetPressurePercent() => currentPressure / maxPressure;
-    
-    // 🔴 MÉTODOS PARA REINICIAR/VOLTAR AO MENU
-    public void ReiniciarJogo()
+    public void TryAgain()
     {
-        Debug.Log("Reiniciando jogo...");
+        Debug.Log("Tentando novamente...");
         Time.timeScale = 1f;
         
         if (!string.IsNullOrEmpty(mainGameScene))
@@ -176,13 +180,11 @@ public class GameController_Def : MonoBehaviour
         }
         else
         {
-            Debug.LogError("O nome da cena principal não foi definido no Inspector!");
-            // Fallback: recarrega a cena atual
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
     
-    public void VoltarAoMenu()
+    public void QuitToMenu()
     {
         Debug.Log("Voltando ao menu principal...");
         Time.timeScale = 1f;
@@ -193,13 +195,26 @@ public class GameController_Def : MonoBehaviour
         }
         else
         {
-            Debug.LogError("O nome da cena do menu não foi definido no Inspector!");
+            Debug.LogError("Nome da cena do menu não configurado!");
         }
     }
     
-    public void SairDoJogo()
+    public void QuitGame()
     {
         Debug.Log("Saindo do jogo...");
         Application.Quit();
+    }
+
+    public void TriggerVictory()
+    {
+        if (currentState == GameState.Victory) return;
+        currentState = GameState.Victory;
+        Time.timeScale = 0f;
+        
+        if (sceneImages != null) sceneImages.SetActive(false);
+        if (pressurePanel != null) pressurePanel.SetActive(false);
+        if (victoryPanel != null) victoryPanel.SetActive(true);
+        
+        Debug.Log("🏆 VITÓRIA!");
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MenuController : MonoBehaviour
 {
@@ -11,21 +12,68 @@ public class MenuController : MonoBehaviour
     public GameObject painelPrincipal;
     public GameObject painelCreditos;
 
+    [Header("Botões (opcional - para referência)")]
+    public Button botaoJogar;
+    public Button botaoCreditos;
+    public Button botaoSair;
+    public Button botaoVoltarCreditos;
+
     void Start()
     {
         MostrarPainelPrincipal();
+        
+        if (botaoVoltarCreditos != null)
+        {
+            botaoVoltarCreditos.onClick.RemoveAllListeners();
+            botaoVoltarCreditos.onClick.AddListener(MostrarPainelPrincipal);
+            Debug.Log("Botão Voltar configurado!");
+        }
+        else
+        {
+            if (painelCreditos != null)
+            {
+                Button voltarBtn = painelCreditos.GetComponentInChildren<Button>();
+                if (voltarBtn != null)
+                {
+                    voltarBtn.onClick.RemoveAllListeners();
+                    voltarBtn.onClick.AddListener(MostrarPainelPrincipal);
+                    Debug.Log("Botão Voltar encontrado automaticamente!");
+                }
+                else
+                {
+                    Debug.LogWarning("Nenhum botão 'Voltar' encontrado dentro do painelCreditos!");
+                }
+            }
+        }
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (painelCreditos != null && painelCreditos.activeSelf)
+            {
+                MostrarPainelPrincipal();
+                Debug.Log("ESC pressionado: voltando ao menu principal");
+            }
+        }
     }
 
     public void MostrarPainelPrincipal()
     {
         DesativarTodosOsPaineis();
-        if (painelPrincipal) painelPrincipal.SetActive(true);
+        if (painelPrincipal != null) 
+        {
+            painelPrincipal.SetActive(true);
+            Debug.Log("Painel principal ativado");
+        }
     }
 
     public void MostrarPainelJogar()
     {
         if (!string.IsNullOrEmpty(proximaCena))
         {
+            Debug.Log($"Carregando cena: {proximaCena}");
             SceneManager.LoadScene(proximaCena);
         }
         else
@@ -37,7 +85,11 @@ public class MenuController : MonoBehaviour
     public void MostrarPainelCreditos()
     {
         DesativarTodosOsPaineis();
-        if (painelCreditos) painelCreditos.SetActive(true);
+        if (painelCreditos != null) 
+        {
+            painelCreditos.SetActive(true);
+            Debug.Log("Painel de créditos ativado");
+        }
     }
 
     public void SairDoJogo()
@@ -48,7 +100,7 @@ public class MenuController : MonoBehaviour
 
     private void DesativarTodosOsPaineis()
     {
-        if (painelPrincipal) painelPrincipal.SetActive(false);
-        if (painelCreditos) painelCreditos.SetActive(false);
+        if (painelPrincipal != null) painelPrincipal.SetActive(false);
+        if (painelCreditos != null) painelCreditos.SetActive(false);
     }
 }

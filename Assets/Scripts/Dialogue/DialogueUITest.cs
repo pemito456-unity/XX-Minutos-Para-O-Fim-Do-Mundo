@@ -7,31 +7,30 @@ using UnityEngine.UI;
 public class DialogueUITest : MonoBehaviour
 {
     [Header("Configurações")]
-    [SerializeField] private float timeBetweenCalls = 10f;
+    [SerializeField] private float timeBetweenCalls = 40f;
     [SerializeField] private float ignoreCallPenalty = 15f;
     [SerializeField] private float callRingingDuration = 10f;
+    [SerializeField] private float dialogueTimeout = 20f;
     
     [Header("Diálogos")]
     [SerializeField] private List<DialogueData> colonelDialogues;
     [SerializeField] private List<DialogueData> secretaryDialogues;
     [SerializeField] private List<DialogueData> scientistDialogues;
     
-    [Header("UI Existente")]
+    [Header("UI")]
     [SerializeField] private GameObject dialoguePanel;
     [SerializeField] private Image speakerPortraitImage;
     [SerializeField] private TMPro.TextMeshProUGUI speakerNameText;
     [SerializeField] private TMPro.TextMeshProUGUI dialogueText;
-    [SerializeField] private Transform choicesContainer;
     
-    [Header("Botões Manuais (4 opções)")]
+    [Header("Botões Manuais (arraste os botões aqui)")]
     [SerializeField] private Button choiceButton1;
     [SerializeField] private Button choiceButton2;
     [SerializeField] private Button choiceButton3;
-    [SerializeField] private Button choiceButton4;
     [SerializeField] private TMPro.TextMeshProUGUI choiceText1;
     [SerializeField] private TMPro.TextMeshProUGUI choiceText2;
     [SerializeField] private TMPro.TextMeshProUGUI choiceText3;
-    [SerializeField] private TMPro.TextMeshProUGUI choiceText4;
+    [SerializeField] private GameObject ChoicesContainer;
     
     [Header("Áudio")]
     [SerializeField] private AudioSource phoneAudioSource;
@@ -45,12 +44,12 @@ public class DialogueUITest : MonoBehaviour
     private DialogueData currentDialogue;
     private bool isDialogueActive = false;
     private bool isRinging = false;
-    private float ringingTimer;
     private Coroutine ringingCoroutine;
+    private Coroutine dialogueTimeoutCoroutine;
     
-    private int scientistCallCount = 0;
-    private int nonScientistCallsSinceLastScientist = 0;
-    private const int CALLS_BEFORE_SCIENTIST = 2;
+    private int currentScientistIndex = 0;
+    private int randomCallsSinceLastScientist = 0;
+    private const int RANDOM_BETWEEN_SCIENTISTS = 2;
     
     private GameObject flashObject;
     private Image flashImage;
@@ -59,24 +58,59 @@ public class DialogueUITest : MonoBehaviour
     {
         gameController = Object.FindAnyObjectByType<GameController_Def>();
         
-        // Garante que o painel começa DESATIVADO
         if (dialoguePanel != null)
-        {
             dialoguePanel.SetActive(false);
-            Debug.Log("DialoguePanel desativado no Start");
-        }
         
         CreateFlashObject();
-        HideAllChoiceButtons();
+        SetupButtons();
         
         StartCoroutine(DialogueScheduler());
         
         Debug.Log($"=== DialogueUITest iniciado ===");
+        Debug.Log($"Total de diálogos do cientista: {scientistDialogues.Count}");
+    }
+    
+    void SetupButtons()
+    {
+        if (choiceButton1 != null)
+        {
+            choiceButton1.onClick.RemoveAllListeners();
+            choiceButton1.onClick.AddListener(() => OnButtonClick(0));
+        }
+        
+        if (choiceButton2 != null)
+        {
+            choiceButton2.onClick.RemoveAllListeners();
+            choiceButton2.onClick.AddListener(() => OnButtonClick(1));
+        }
+        
+        if (choiceButton3 != null)
+        {
+            choiceButton3.onClick.RemoveAllListeners();
+            choiceButton3.onClick.AddListener(() => OnButtonClick(2));
+        }
+        
+        Debug.Log("Botões configurados!");
+    }
+    
+    public void OnButtonClick(int buttonIndex)
+    {
+        if (dialogueTimeoutCoroutine != null)
+        {
+            StopCoroutine(dialogueTimeoutCoroutine);
+            dialogueTimeoutCoroutine = null;
+        }
+        
+        Debug.Log($" Botão {buttonIndex + 1} clicado! ================");
+        
+        if (currentDialogue != null && buttonIndex < currentDialogue.choices.Count)
+        {
+            OnChoiceSelected(currentDialogue.choices[buttonIndex]);
+        }
     }
     
     void Update()
     {
-        // Teclas de teste rápido
         if (Input.GetKeyDown(KeyCode.T))
         {
             TestForceCall();
@@ -92,7 +126,6 @@ public class DialogueUITest : MonoBehaviour
         if (choiceButton1 != null) choiceButton1.gameObject.SetActive(false);
         if (choiceButton2 != null) choiceButton2.gameObject.SetActive(false);
         if (choiceButton3 != null) choiceButton3.gameObject.SetActive(false);
-        if (choiceButton4 != null) choiceButton4.gameObject.SetActive(false);
     }
     
     void ShowChoiceButtons(int count)
@@ -102,7 +135,6 @@ public class DialogueUITest : MonoBehaviour
         if (count >= 1 && choiceButton1 != null) choiceButton1.gameObject.SetActive(true);
         if (count >= 2 && choiceButton2 != null) choiceButton2.gameObject.SetActive(true);
         if (count >= 3 && choiceButton3 != null) choiceButton3.gameObject.SetActive(true);
-        if (count >= 4 && choiceButton4 != null) choiceButton4.gameObject.SetActive(true);
     }
     
     void SetChoiceButtonText(int index, string text)
@@ -112,46 +144,20 @@ public class DialogueUITest : MonoBehaviour
             case 1: if (choiceText1 != null) choiceText1.text = text; break;
             case 2: if (choiceText2 != null) choiceText2.text = text; break;
             case 3: if (choiceText3 != null) choiceText3.text = text; break;
-            case 4: if (choiceText4 != null) choiceText4.text = text; break;
         }
-    }
-    
-    void ClearAllChoiceListeners()
-    {
-        if (choiceButton1 != null) choiceButton1.onClick.RemoveAllListeners();
-        if (choiceButton2 != null) choiceButton2.onClick.RemoveAllListeners();
-        if (choiceButton3 != null) choiceButton3.onClick.RemoveAllListeners();
-        if (choiceButton4 != null) choiceButton4.onClick.RemoveAllListeners();
     }
     
     void CreateDialogueButtons(List<DialogueChoice> choices)
     {
-        ClearAllChoiceListeners();
-        
-        int choiceCount = Mathf.Min(choices.Count, 4);
+        int choiceCount = Mathf.Min(choices.Count, 3);
         ShowChoiceButtons(choiceCount);
         
         for (int i = 0; i < choiceCount; i++)
         {
             SetChoiceButtonText(i + 1, choices[i].buttonText);
-            
-            Button btn = null;
-            switch(i)
-            {
-                case 0: btn = choiceButton1; break;
-                case 1: btn = choiceButton2; break;
-                case 2: btn = choiceButton3; break;
-                case 3: btn = choiceButton4; break;
-            }
-            
-            if (btn != null)
-            {
-                int index = i;
-                btn.onClick.AddListener(() => OnChoiceSelected(choices[index]));
-            }
         }
         
-        Debug.Log($"✅ {choiceCount} botões de escolha criados");
+        Debug.Log($" {choiceCount} botões configurados");
     }
     
     void CreateFlashObject()
@@ -220,8 +226,10 @@ public class DialogueUITest : MonoBehaviour
             if (gameController != null && 
                 gameController.currentState == GameController_Def.GameState.Gameplay && 
                 !isDialogueActive && 
-                !isRinging)
+                !isRinging &&
+                pendingDialogues.Count == 0)
             {
+                Debug.Log($"Scheduler: Nova chamada após {timeBetweenCalls}s");
                 ScheduleNextDialogue();
             }
         }
@@ -234,36 +242,42 @@ public class DialogueUITest : MonoBehaviour
         if (nextDialogue != null)
         {
             pendingDialogues.Enqueue(nextDialogue);
-            Debug.Log($"Novo diálogo na fila: {nextDialogue.speakerName}");
+            Debug.Log($"Novo diálogo na fila: {nextDialogue.speakerName} (Tipo: {nextDialogue.speakerType})");
             StartRinging();
+        }
+        else
+        {
+            Debug.LogError("GetNextDialogue retornou NULL!");
         }
     }
     
     DialogueData GetNextDialogue()
     {
-        if (scientistCallCount < scientistDialogues.Count)
+        if (currentScientistIndex < scientistDialogues.Count)
         {
-            if (nonScientistCallsSinceLastScientist >= CALLS_BEFORE_SCIENTIST)
+            if (randomCallsSinceLastScientist >= RANDOM_BETWEEN_SCIENTISTS)
             {
-                var scientistDialogue = scientistDialogues[scientistCallCount];
-                scientistCallCount++;
-                nonScientistCallsSinceLastScientist = 0;
-                Debug.Log($"Sequência: CIENTISTA {scientistCallCount}/{scientistDialogues.Count}");
-                return scientistDialogue;
+                DialogueData scientist = scientistDialogues[currentScientistIndex];
+                currentScientistIndex++;
+                randomCallsSinceLastScientist = 0;
+                Debug.Log($"🔬 CIENTISTA {currentScientistIndex}/{scientistDialogues.Count}");
+                return scientist;
             }
             else
             {
-                DialogueData randomDialogue = GetRandomNonScientistDialogue();
-                if (randomDialogue != null)
+                DialogueData random = GetRandomNonScientistDialogue();
+                if (random != null)
                 {
-                    nonScientistCallsSinceLastScientist++;
-                    return randomDialogue;
+                    randomCallsSinceLastScientist++;
+                    Debug.Log($"ALEATÓRIO {randomCallsSinceLastScientist}/{RANDOM_BETWEEN_SCIENTISTS}");
+                    return random;
                 }
             }
         }
         
-        if (scientistCallCount >= scientistDialogues.Count && scientistDialogues.Count > 0)
+        if (currentScientistIndex >= scientistDialogues.Count && scientistDialogues.Count > 0)
         {
+            Debug.Log("VITÓRIA!");
             if (gameController != null)
                 gameController.TriggerVictory();
             return null;
@@ -279,6 +293,7 @@ public class DialogueUITest : MonoBehaviour
         availableDialogues.AddRange(secretaryDialogues);
         
         if (availableDialogues.Count == 0) return null;
+        
         return availableDialogues[Random.Range(0, availableDialogues.Count)];
     }
     
@@ -286,144 +301,167 @@ public class DialogueUITest : MonoBehaviour
     {
         if (pendingDialogues.Count == 0) return;
         
+        if (isRinging)
+        {
+            Debug.LogWarning("Já está tocando!");
+            return;
+        }
+        
+        Debug.Log("TELEFONE TOCANDO!");
         isRinging = true;
-        ringingTimer = callRingingDuration;
         
         if (phoneAudioSource != null && phoneRingingClip != null)
         {
             phoneAudioSource.clip = phoneRingingClip;
             phoneAudioSource.loop = true;
             phoneAudioSource.Play();
+            Debug.Log("🔊 Áudio do telefone começou a tocar");
         }
         
+        Debug.Log(" Abrindo diálogo...");
+        
         if (ringingCoroutine != null) StopCoroutine(ringingCoroutine);
-        ringingCoroutine = StartCoroutine(RingingTimer());
+        ringingCoroutine = StartCoroutine(RingingTimerCoroutine());
         
-        Debug.Log("📞 Telefone tocando...");
-        
-        // 🔴 CORREÇÃO 1: Quando o telefone toca, automaticamente inicia o diálogo
-        // (não precisa de botão para atender)
         AnswerPhone();
-
-        if (phoneAudioSource != null && phoneRingingClip != null)
-    {
-        phoneAudioSource.clip = phoneRingingClip;
-        phoneAudioSource.loop = true;
-        phoneAudioSource.Play();
-    }
     }
     
-    IEnumerator RingingTimer()
+    IEnumerator RingingTimerCoroutine()
     {
-        while (ringingTimer > 0)
+        float elapsed = 0f;
+        
+        while (elapsed < callRingingDuration && isRinging)
         {
-            ringingTimer -= Time.unscaledDeltaTime;
+            elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
         
         if (isRinging && pendingDialogues.Count > 0)
         {
             DialogueData ignoredDialogue = pendingDialogues.Dequeue();
-            Debug.Log($"⏰ Chamada ignorada! Penalidade de {ignoreCallPenalty}");
+            Debug.Log($"Chamada ignorada! Penalidade: +{ignoreCallPenalty} pressão");
             
             if (gameController != null)
                 gameController.ModifyPressureByDialogue(ignoreCallPenalty);
             
-            StopRinging();
+            if (phoneAudioSource != null && phoneAudioSource.isPlaying)
+            {
+                phoneAudioSource.Stop();
+                phoneAudioSource.loop = false;
+            }
             
-            if (ignoredDialogue.speakerType == SpeakerType.Scientist)
-            {
-                pendingDialogues.Enqueue(ignoredDialogue);
-            }
-            else if (nonScientistCallsSinceLastScientist > 0)
-            {
-                nonScientistCallsSinceLastScientist--;
-            }
+            StopRinging();
         }
     }
     
     void StopRinging()
     {
+        Debug.Log("Telefone parou de tocar (StopRinging)");
         isRinging = false;
         
-        if (phoneAudioSource != null)
+        if (ringingCoroutine != null)
         {
-            phoneAudioSource.Stop();
-            phoneAudioSource.loop = false;
+            StopCoroutine(ringingCoroutine);
+            ringingCoroutine = null;
         }
-        
-        if (ringingCoroutine != null) StopCoroutine(ringingCoroutine);
     }
     
     public void AnswerPhone()
     {
-        Debug.Log($"📞 Atendendo chamada... pending={pendingDialogues.Count}");
+        Debug.Log($"Atendendo chamada! pending={pendingDialogues.Count}");
         
         if (!isDialogueActive && pendingDialogues.Count > 0)
         {
-            StopRinging();
+            Debug.Log("Iniciando diálogo!");
+            
+            isRinging = false;
+            
+            if (ringingCoroutine != null)
+            {
+                StopCoroutine(ringingCoroutine);
+                ringingCoroutine = null;
+            }
+            
             currentDialogue = pendingDialogues.Dequeue();
             StartDialogue();
         }
     }
     
     void StartDialogue()
-{
-    if (currentDialogue == null)
     {
-        Debug.LogError("currentDialogue é null!");
-        return;
-    }
-    
-    Debug.Log($"💬 Iniciando diálogo: {currentDialogue.speakerName}");
-    
-    isDialogueActive = true;
-    
-    if (gameController != null)
-        gameController.currentState = GameController_Def.GameState.Dialogue;
-    
-    Time.timeScale = 0f;
-    
-    if (dialoguePanel != null)
-    {
-        dialoguePanel.SetActive(true);
-        Debug.Log($"✅ DialoguePanel ativado");
-    }
-    
-    // =============================================
-    // 🔴 LINHA ADICIONADA - Toca o telefone uma vez
-    // =============================================
-    if (phoneAudioSource != null && phoneRingingClip != null)
-        phoneAudioSource.PlayOneShot(phoneRingingClip);
-    
-    if (speakerPortraitImage != null)
-    {
-        if (currentDialogue.speakerPortrait != null)
+        if (currentDialogue == null)
         {
-            speakerPortraitImage.sprite = currentDialogue.speakerPortrait;
-            speakerPortraitImage.gameObject.SetActive(true);
+            Debug.LogError("currentDialogue é null!");
+            return;
         }
-        else
+        
+        Debug.Log($"Iniciando diálogo: {currentDialogue.speakerName}");
+        
+        isDialogueActive = true;
+        
+        if (dialoguePanel != null)
         {
-            speakerPortraitImage.gameObject.SetActive(false);
+            dialoguePanel.SetActive(true);
         }
+        
+        if (speakerPortraitImage != null)
+        {
+            if (currentDialogue.speakerPortrait != null)
+            {
+                speakerPortraitImage.sprite = currentDialogue.speakerPortrait;
+                speakerPortraitImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                speakerPortraitImage.gameObject.SetActive(false);
+            }
+        }
+        
+        if (speakerNameText != null)
+            speakerNameText.text = currentDialogue.speakerName;
+        
+        if (dialogueText != null)
+            dialogueText.text = currentDialogue.dialogueText;
+        
+        CreateDialogueButtons(currentDialogue.choices);
+        
+        if (dialogueTimeoutCoroutine != null)
+            StopCoroutine(dialogueTimeoutCoroutine);
+        dialogueTimeoutCoroutine = StartCoroutine(DialogueTimeoutCoroutine());
+        
+        Debug.Log($"Diálogo exibido! ({currentDialogue.choices.Count} opções) - Áudio do telefone continua tocando");
     }
     
-    if (speakerNameText != null)
-        speakerNameText.text = currentDialogue.speakerName;
-    
-    if (dialogueText != null)
-        dialogueText.text = currentDialogue.dialogueText;
-    
-    Canvas.ForceUpdateCanvases();
-    CreateDialogueButtons(currentDialogue.choices);
-    
-    Debug.Log($"✅ Diálogo exibido");
-}
+    IEnumerator DialogueTimeoutCoroutine()
+    {
+        float elapsed = 0f;
+        
+        while (elapsed < dialogueTimeout)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        
+        if (isDialogueActive && currentDialogue != null)
+        {
+            Debug.Log($"⏰ Diálogo ignorado! Nenhuma escolha foi feita em {dialogueTimeout} segundos. Penalidade: +{ignoreCallPenalty} pressão");
+            
+            if (gameController != null)
+                gameController.ModifyPressureByDialogue(ignoreCallPenalty);
+            
+            EndDialogue();
+        }
+    }
     
     void OnChoiceSelected(DialogueChoice choice)
     {
-        Debug.Log($"🔘 Escolha: {choice.buttonText} | Pressão: {(choice.pressureChange >= 0 ? "+" : "")}{choice.pressureChange}");
+        if (dialogueTimeoutCoroutine != null)
+        {
+            StopCoroutine(dialogueTimeoutCoroutine);
+            dialogueTimeoutCoroutine = null;
+        }
+        
+        Debug.Log($"Escolha: {choice.buttonText} | Pressão: {(choice.pressureChange >= 0 ? "+" : "")}{choice.pressureChange}");
         
         if (gameController != null)
         {
@@ -435,32 +473,71 @@ public class DialogueUITest : MonoBehaviour
         if (choice.screenFlashColor != null && choice.screenFlashColor.a > 0)
             TriggerScreenFlash(choice.screenFlashColor, choice.screenFlashDuration);
         
+        StartCoroutine(ShowReactionAndClose(choice));
+    }
+    
+    IEnumerator ShowReactionAndClose(DialogueChoice choice)
+    {
+        HideAllChoiceButtons();
+        
+        string originalSpeakerName = speakerNameText.text;
+        string originalDialogueText = dialogueText.text;
+        
+        if (!string.IsNullOrEmpty(choice.speakerReaction))
+        {
+            speakerNameText.text = currentDialogue.speakerName;
+            dialogueText.text = choice.speakerReaction;
+            Debug.Log($"🎭 Reação: {currentDialogue.speakerName}: {choice.speakerReaction}");
+        }
+        else
+        {
+            speakerNameText.text = "???";
+            dialogueText.text = "...";
+        }
+        
+        yield return new WaitForSecondsRealtime(2f);
+        
+        speakerNameText.text = originalSpeakerName;
+        dialogueText.text = originalDialogueText;
+        
         EndDialogue();
     }
     
     void EndDialogue()
     {
-        Debug.Log($"🔚 Fechando diálogo");
+        Debug.Log("Fechando diálogo");
         
         isDialogueActive = false;
+        
+        if (dialogueTimeoutCoroutine != null)
+        {
+            StopCoroutine(dialogueTimeoutCoroutine);
+            dialogueTimeoutCoroutine = null;
+        }
         
         if (dialoguePanel != null)
             dialoguePanel.SetActive(false);
         
-        if (gameController != null)
-            gameController.currentState = GameController_Def.GameState.Gameplay;
-        
-        Time.timeScale = 1f;
         currentDialogue = null;
         
         HideAllChoiceButtons();
-        ClearAllChoiceListeners();
+        
+        if (phoneAudioSource != null && phoneAudioSource.isPlaying)
+        {
+            phoneAudioSource.Stop();
+            phoneAudioSource.loop = false;
+            Debug.Log("🔊 Áudio do telefone parou (diálogo fechado)");
+        }
     }
     
     public void TestForceCall()
     {
         Debug.Log("=== TESTE: Forçando chamada ===");
-        ScheduleNextDialogue();
+        
+        if (!isRinging && !isDialogueActive)
+        {
+            ScheduleNextDialogue();
+        }
     }
     
     public void TestForceDialogue()
@@ -472,17 +549,30 @@ public class DialogueUITest : MonoBehaviour
             currentDialogue = colonelDialogues[0];
             StartDialogue();
         }
+        else if (scientistDialogues.Count > 0)
+        {
+            currentDialogue = scientistDialogues[0];
+            StartDialogue();
+        }
         else
         {
-            Debug.LogError("Nenhum diálogo do Coronel disponível para teste!");
+            Debug.LogError("Nenhum diálogo disponível!");
         }
     }
     
     public void ResetDialogueSequence()
     {
-        scientistCallCount = 0;
-        nonScientistCallsSinceLastScientist = 0;
+        currentScientistIndex = 0;
+        randomCallsSinceLastScientist = 0;
         pendingDialogues.Clear();
+        
+        if (phoneAudioSource != null && phoneAudioSource.isPlaying)
+        {
+            phoneAudioSource.Stop();
+            phoneAudioSource.loop = false;
+        }
+        
+        StopRinging();
         Debug.Log("Sequência de diálogos resetada!");
     }
     

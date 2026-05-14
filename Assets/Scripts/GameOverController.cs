@@ -23,7 +23,22 @@ public class GameOverController : MonoBehaviour
 
     void Start()
     {
-        MostrarGameOver();
+        // 🔴 CORREÇÃO: NÃO chama MostrarGameOver automaticamente!
+        // O GameOver só deve ser mostrado quando chamado pelo GameController
+        // MostrarGameOver(); ← REMOVA ou COMENTE esta linha
+        
+        // Garante que o painel de Game Over começa desativado
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+        
+        // Garante que o SceneImages começa ATIVADO
+        if (sceneImages != null)
+        {
+            sceneImages.SetActive(true);
+            Debug.Log("SceneImages ativado no Start do GameOverController");
+        }
+        
+        Debug.Log("GameOverController inicializado. Aguardando TriggerGameOver...");
     }
 
     public void MostrarGameOver()
@@ -32,7 +47,7 @@ public class GameOverController : MonoBehaviour
         if (sceneImages != null)
         {
             sceneImages.SetActive(false);
-            Debug.Log("SceneImages desativado");
+            Debug.Log("SceneImages desativado - Game Over");
         }
         
         // Desativa todos os outros painéis (se houver)
@@ -49,14 +64,14 @@ public class GameOverController : MonoBehaviour
             Debug.LogError("GameOverPanel não está atribuído no Inspector!");
         }
         
-        // Pausa o jogo (opcional)
+        // Pausa o jogo
         Time.timeScale = 0f;
     }
 
     public void ReiniciarJogo()
     {
         Debug.Log("Reiniciando jogo...");
-        Time.timeScale = 1f; // Volta o tempo ao normal
+        Time.timeScale = 1f;
         
         if (!string.IsNullOrEmpty(mainGameScene))
         {
@@ -71,7 +86,7 @@ public class GameOverController : MonoBehaviour
     public void VoltarAoMenu()
     {
         Debug.Log("Voltando ao menu principal...");
-        Time.timeScale = 1f; // Volta o tempo ao normal
+        Time.timeScale = 1f;
         
         if (!string.IsNullOrEmpty(mainMenuScene))
         {

@@ -25,6 +25,10 @@ public class ComputerIntro : MonoBehaviour
     private StringBuilder computerFullText = new StringBuilder();
     private StringBuilder alastairFullText = new StringBuilder();
     
+    // 🔴 CONTROLE DE SKIP
+    private bool skipRequested = false;
+    private Coroutine currentRoutine;
+    
     private string[] computerLines = new string[]
     {
         "ATENÇÃO. MÚLTIPLOS OBJETOS FORAM DETECTADOS EM TRAJETÓRIA BALÍSTICA.",
@@ -46,7 +50,40 @@ public class ComputerIntro : MonoBehaviour
     void Start()
     {
         CreateUI();
-        StartCoroutine(RunIntro());
+        currentRoutine = StartCoroutine(RunIntro());
+    }
+    
+    void Update()
+    {
+        // 🔴 TECLA E PARA PULAR A CUTSCENE (carrega a cena diretamente)
+        if (Input.GetKeyDown(KeyCode.E) && !skipRequested)
+        {
+            SkipIntro();
+        }
+    }
+    
+    // 🔴 MÉTODO PARA PULAR A INTRODUÇÃO
+    private void SkipIntro()
+    {
+        skipRequested = true;
+        
+        Debug.Log("🚀 Pular introdução solicitado (Tecla E)! Carregando cena principal...");
+        
+        // Para a corrotina atual
+        if (currentRoutine != null)
+        {
+            StopCoroutine(currentRoutine);
+        }
+        
+        // Carrega a próxima cena diretamente (sem fade)
+        if (!string.IsNullOrEmpty(nextSceneName))
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneName);
+        }
+        else
+        {
+            introPanel.SetActive(false);
+        }
     }
     
     void CreateUI()
@@ -86,7 +123,7 @@ public class ComputerIntro : MonoBehaviour
         computerText.color = new Color(0, 0.8f, 0);
         computerText.alignment = TextAnchor.UpperLeft;
         computerText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        computerText.verticalOverflow = VerticalWrapMode.Overflow; // Mudado para Overflow
+        computerText.verticalOverflow = VerticalWrapMode.Overflow;
         
         RectTransform computerRect = computerGO.GetComponent<RectTransform>();
         computerRect.anchorMin = new Vector2(0, 0.5f);
@@ -104,13 +141,31 @@ public class ComputerIntro : MonoBehaviour
         alastairText.color = Color.white;
         alastairText.alignment = TextAnchor.UpperLeft;
         alastairText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        alastairText.verticalOverflow = VerticalWrapMode.Overflow; // Mudado para Overflow
+        alastairText.verticalOverflow = VerticalWrapMode.Overflow;
         
         RectTransform alastairRect = alastairGO.GetComponent<RectTransform>();
         alastairRect.anchorMin = new Vector2(0, 0);
         alastairRect.anchorMax = new Vector2(1, 0.4f);
         alastairRect.offsetMin = new Vector2(100, 50);
         alastairRect.offsetMax = new Vector2(-100, -20);
+        
+        // 🔴 TEXTO "Pressione E para pular" (canto inferior direito)
+        GameObject skipTextGO = new GameObject("SkipText");
+        skipTextGO.transform.SetParent(introPanel.transform, false);
+        
+        Text skipText = skipTextGO.AddComponent<Text>();
+        skipText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        skipText.fontSize = 24;
+        skipText.color = new Color(0.7f, 0.7f, 0.7f, 0.8f);
+        skipText.text = "Pressione E para pular";
+        skipText.alignment = TextAnchor.LowerRight;
+        
+        RectTransform skipRect = skipTextGO.GetComponent<RectTransform>();
+        skipRect.anchorMin = new Vector2(0, 0);
+        skipRect.anchorMax = new Vector2(1, 0);
+        skipRect.pivot = new Vector2(1, 0);
+        skipRect.offsetMin = new Vector2(0, 20);
+        skipRect.offsetMax = new Vector2(-30, 60);
         
         // 5. Cria o AudioSource
         audioSource = gameObject.AddComponent<AudioSource>();
@@ -133,6 +188,8 @@ public class ComputerIntro : MonoBehaviour
         // 🔴 COMPUTADOR - Acumula frases
         for (int i = 0; i < computerLines.Length; i++)
         {
+            if (skipRequested) yield break;
+            
             // Adiciona quebra de linha se não for a primeira frase
             if (i > 0)
             {
@@ -143,14 +200,20 @@ public class ComputerIntro : MonoBehaviour
             
             // Digita a frase atual (mantendo as anteriores)
             yield return StartCoroutine(TypeLine(computerText, computerFullText.ToString(), computerLines[i]));
-            yield return new WaitForSeconds(delayBetweenLines);
+            
+            if (!skipRequested)
+                yield return new WaitForSeconds(delayBetweenLines);
         }
+        
+        if (skipRequested) yield break;
         
         yield return new WaitForSeconds(0.8f);
         
         // 🔴 ALASTAIR - Acumula frases
         for (int i = 0; i < alastairLines.Length; i++)
         {
+            if (skipRequested) yield break;
+            
             if (i > 0)
             {
                 alastairFullText.Append("\n\n");
@@ -159,8 +222,12 @@ public class ComputerIntro : MonoBehaviour
             alastairFullText.Append(alastairLines[i]);
             
             yield return StartCoroutine(TypeLine(alastairText, alastairFullText.ToString(), alastairLines[i]));
-            yield return new WaitForSeconds(delayBetweenLines * 0.7f);
+            
+            if (!skipRequested)
+                yield return new WaitForSeconds(delayBetweenLines * 0.7f);
         }
+        
+        if (skipRequested) yield break;
         
         yield return new WaitForSeconds(2f);
         
@@ -184,6 +251,13 @@ public class ComputerIntro : MonoBehaviour
         // Digita a nova linha caractere por caractere
         for (int i = 0; i <= newLine.Length; i++)
         {
+            // 🔴 VERIFICA SE PULAR FOI SOLICITADO
+            if (skipRequested)
+            {
+                textComponent.text = fullText;
+                yield break;
+            }
+            
             string typedPart = newLine.Substring(0, i);
             textComponent.text = existingText + typedPart;
             

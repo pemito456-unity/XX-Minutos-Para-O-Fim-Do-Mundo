@@ -8,10 +8,13 @@ public class EnemyMissileSpawner_Def : MonoBehaviour
 
     [Header("Área de Exclusão (Interface)")]
     [SerializeField] private float excludeXMin = -8.36f;
-    [SerializeField] private float excludeXMax = -3.35f;
+    [SerializeField] private float excludeXMax = -3.83f;
+    
+    [Header("Margem de Segurança")]
+    [SerializeField] private float safeMargin = 0.2f;
 
     [Header("Configuração de Spawn")]
-    [SerializeField] private float spawnY = -2f; // 🔴 VALOR MAIS BAIXO (negativo)
+    [SerializeField] private float spawnY = -2f;
 
     private float minX, maxX;
     public float delayBetweenMissiles = 1.5f;
@@ -21,36 +24,24 @@ public class EnemyMissileSpawner_Def : MonoBehaviour
     {
         Debug.Log("Awake: Iniciando Spawner");
         
-        // Calcula os limites X da câmera
         minX = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0)).x;
         maxX = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
         
-        Debug.Log($"minX: {minX}, maxX: {maxX}, spawnY: {spawnY}");
+        Debug.Log($"Limites da tela: minX={minX}, maxX={maxX}");
+        Debug.Log($"Área excluída: {excludeXMin} até {excludeXMax}");
         
         gameController = Object.FindAnyObjectByType<GameController_Def>();
-        Debug.Log($"GameController encontrado? {gameController != null}");
         
         if (missilePrefab == null)
         {
             Debug.LogError("ERRO: missilePrefab não está atribuído no Inspector!");
         }
-        else
-        {
-            Debug.Log("MissilePrefab atribuído corretamente");
-        }
         
         StartCoroutine(SpawnMissilesLoop());
     }
 
-    void Start()
-    {
-        Debug.Log("Start do Spawner rodou (só pra confirmar que o objeto está ativo)");
-    }
-
     private IEnumerator SpawnMissilesLoop()
     {
-        Debug.Log("Corrotina de SPAWN iniciada!");
-        
         while (true) 
         {
             yield return new WaitForSeconds(delayBetweenMissiles);
@@ -58,11 +49,19 @@ public class EnemyMissileSpawner_Def : MonoBehaviour
             if (gameController != null && gameController.currentState == GameController_Def.GameState.Gameplay)
             {
                 float spawnX = GetRandomXExcludingInterface();
+                
+                if (IsXInForbiddenArea(spawnX))
+                {
+                    Debug.LogWarning($"X={spawnX} está na área proibida! Recusando spawn.");
+                    continue; 
+                }
+                
                 Vector3 spawnPosition = new Vector3(spawnX, spawnY + Ypadding, 0);
 
                 if (missilePrefab != null) 
                 {
                     Instantiate(missilePrefab, spawnPosition, Quaternion.identity);
+                    Debug.Log($"Míssil spawnado em X: {spawnX} ✓");
                 }
             }
         }
@@ -70,15 +69,25 @@ public class EnemyMissileSpawner_Def : MonoBehaviour
 
     private float GetRandomXExcludingInterface()
     {
-        float leftAreaWidth = excludeXMin - minX;
-        float rightAreaWidth = maxX - excludeXMax;
+        float leftAreaWidth = (excludeXMin - safeMargin) - minX;
+        float rightAreaWidth = maxX - (excludeXMax + safeMargin);
         float totalFreeWidth = leftAreaWidth + rightAreaWidth;
+
+        Debug.Log($"LeftArea: {leftAreaWidth}, RightArea: {rightAreaWidth}, Total: {totalFreeWidth}");
 
         if (totalFreeWidth <= 0) return Random.Range(minX, maxX);
 
         if (Random.Range(0, totalFreeWidth) < leftAreaWidth)
-            return Random.Range(minX, excludeXMin);
+            return Random.Range(minX, excludeXMin - safeMargin);
         else
-            return Random.Range(excludeXMax, maxX);
+            return Random.Range(excludeXMax + safeMargin, maxX);
+    }
+    
+    private bool IsXInForbiddenArea(float x)
+    {
+        float forbiddenStart = excludeXMin - safeMargin;
+        float forbiddenEnd = excludeXMax + safeMargin;
+        
+        return (x >= forbiddenStart && x <= forbiddenEnd);
     }
 }

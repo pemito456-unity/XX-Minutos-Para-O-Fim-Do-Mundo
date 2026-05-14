@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -107,6 +107,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMissileController_Def
   speed: 5
   explosionPrefab: {fileID: 4159878286275772821, guid: a0706858313e69441a5272da09f3957d, type: 3}
+  cannonTransform: {fileID: 0}
+  fixedCannonPosition: {x: -0.12, y: -3.36}
+  useCannonTransform: 1
 --- !u!58 &-4693611551985533698
 CircleCollider2D:
   m_ObjectHideFlags: 0

@@ -41,7 +41,6 @@ public class EnemyMissile_Def : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Míssil abatido pela explosão
         if (collision.CompareTag("Explosions"))
         {
             if (gameController != null)
@@ -51,14 +50,13 @@ public class EnemyMissile_Def : MonoBehaviour
             Destroy(gameObject);
         }
 
-        // Míssil atingiu a cidade
         if (collision.CompareTag("Defenders"))
         {
             if (gameController != null)
             {
                 gameController.OnMissileHitCity();
+                gameController.AddRedPressure(15f);
                 
-                // Aplica dano à cidade
                 CityScript city = collision.GetComponent<CityScript>();
                 if (city != null)
                 {
