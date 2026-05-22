@@ -28,10 +28,10 @@ public class DialogueUITutorial : MonoBehaviour
     
     void Start()
     {
-        if (dialoguePanel != null)
-            dialoguePanel.SetActive(false);
-        
+        // 🔴 NÃO desativa o painel aqui!
+        // Apenas garante que os botões estão configurados
         SetupButtons();
+        Debug.Log("DialogueUITutorial iniciado!");
     }
     
     void SetupButtons()
@@ -98,6 +98,8 @@ public class DialogueUITutorial : MonoBehaviour
     
     public void ShowDialogue(DialogueData dialogue, System.Action onComplete = null)
     {
+        Debug.Log($"ShowDialogue chamado para: {dialogue.speakerName}");
+        
         if (dialogue == null)
         {
             Debug.LogError("Diálogo é null!");
@@ -108,6 +110,13 @@ public class DialogueUITutorial : MonoBehaviour
         currentDialogue = dialogue;
         onDialogueComplete = onComplete;
         
+        // 🔴 ATIVA O PAINEL ANTES DE INICIAR A CORROTINA
+        if (dialoguePanel != null && !dialoguePanel.activeSelf)
+        {
+            dialoguePanel.SetActive(true);
+            Debug.Log("DialoguePanel ativado antes da corrotina");
+        }
+        
         StartCoroutine(StartDialogueCoroutine());
     }
     
@@ -115,17 +124,17 @@ public class DialogueUITutorial : MonoBehaviour
     {
         isDialogueActive = true;
         
-        if (dialoguePanel != null)
+        // 🔴 GARANTE QUE O PAINEL ESTÁ ATIVO
+        if (dialoguePanel != null && !dialoguePanel.activeSelf)
+        {
             dialoguePanel.SetActive(true);
+            Debug.Log("DialoguePanel ativado na corrotina");
+        }
         
         if (speakerPortraitImage != null && currentDialogue.speakerPortrait != null)
         {
             speakerPortraitImage.sprite = currentDialogue.speakerPortrait;
             speakerPortraitImage.gameObject.SetActive(true);
-        }
-        else if (speakerPortraitImage != null)
-        {
-            speakerPortraitImage.gameObject.SetActive(false);
         }
         
         if (speakerNameText != null)
@@ -157,25 +166,14 @@ public class DialogueUITutorial : MonoBehaviour
     {
         HideAllChoiceButtons();
         
-        string originalSpeakerName = speakerNameText.text;
-        string originalDialogueText = dialogueText.text;
-        
         if (!string.IsNullOrEmpty(choice.speakerReaction))
         {
-            speakerNameText.text = currentDialogue.speakerName;
-            dialogueText.text = choice.speakerReaction;
-            Debug.Log($"🎭 Tutorial - Reação: {currentDialogue.speakerName}: {choice.speakerReaction}");
-        }
-        else
-        {
-            speakerNameText.text = "???";
-            dialogueText.text = "...";
+            if (dialogueText != null)
+                dialogueText.text = choice.speakerReaction;
+            Debug.Log($"🎭 Reação: {choice.speakerReaction}");
         }
         
         yield return new WaitForSecondsRealtime(reactionTime);
-        
-        speakerNameText.text = originalSpeakerName;
-        dialogueText.text = originalDialogueText;
         
         CloseDialogue();
     }
@@ -194,14 +192,7 @@ public class DialogueUITutorial : MonoBehaviour
         }
         
         currentDialogue = null;
-        
         HideAllChoiceButtons();
-    }
-    
-    public void ForceCloseDialogue()
-    {
-        StopAllCoroutines();
-        CloseDialogue();
     }
     
     public bool IsDialogueActive() => isDialogueActive;

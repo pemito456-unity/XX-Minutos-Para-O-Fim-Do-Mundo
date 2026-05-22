@@ -1071,6 +1071,7 @@ GameObject:
   - component: {fileID: 890590775}
   - component: {fileID: 890590777}
   - component: {fileID: 890590776}
+  - component: {fileID: 890590778}
   m_Layer: 5
   m_Name: DialoguePanel
   m_TagString: Untagged
@@ -1115,7 +1116,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1139,6 +1140,29 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 890590774}
   m_CullTransparentMesh: 1
+--- !u!114 &890590778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890590774}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1833f23f42823841b0155f5d922232c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueUITutorial
+  dialoguePanel: {fileID: 890590774}
+  speakerPortraitImage: {fileID: 278923966}
+  speakerNameText: {fileID: 759421088}
+  dialogueText: {fileID: 795921421}
+  choiceButton1: {fileID: 5256134931727045432}
+  choiceButton2: {fileID: 2462269145692164335}
+  choiceButton3: {fileID: 2462269145645167491}
+  choiceText1: {fileID: 1761616961395208834}
+  choiceText2: {fileID: 8262050516851077461}
+  choiceText3: {fileID: 8262050516642222649}
+  reactionTime: 2
 --- !u!1 &955761610
 GameObject:
   m_ObjectHideFlags: 0
@@ -1838,8 +1862,8 @@ GameObject:
   - component: {fileID: 1558350645}
   - component: {fileID: 1558350644}
   - component: {fileID: 1558350643}
+  - component: {fileID: 1558350649}
   - component: {fileID: 1558350646}
-  - component: {fileID: 1558350647}
   - component: {fileID: 1558350648}
   m_Layer: 0
   m_Name: Main Camera
@@ -1966,25 +1990,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!114 &1558350647
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1558350642}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6e3a26e4ba22ef4e80e39a715f3266c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  missilePrefab: {fileID: 4773340915951372779, guid: f28f29db3218ab347972de06f7a5629d, type: 3}
-  cursorTexture: {fileID: 2800000, guid: 09e5df380179a2e4a88042061546c746, type: 3}
-  cannonPosition: {x: 2.53, y: -3.69}
-  audioSource: {fileID: 1558350648}
-  shootSound: {fileID: 8300000, guid: fb3bca686248db449ab1d7d23925c89b, type: 3}
-  shootVolume: 0.5
-  shootCooldown: 0.5
 --- !u!82 &1558350648
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2082,6 +2087,25 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1558350649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1558350642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1724364d7fd23f44cba37fc4aeb4a8b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CursorController_Tutorial
+  missilePrefab: {fileID: 4773340915951372779, guid: f28f29db3218ab347972de06f7a5629d, type: 3}
+  cursorTexture: {fileID: 2800000, guid: 09e5df380179a2e4a88042061546c746, type: 3}
+  cannonPosition: {x: -0.12, y: -3.36}
+  audioSource: {fileID: 1558350648}
+  shootSound: {fileID: 8300000, guid: fb3bca686248db449ab1d7d23925c89b, type: 3}
+  shootVolume: 0.5
+  shootCooldown: 0.5
 --- !u!1001 &1585256390
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2587,55 +2611,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &1986648363
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1986648365}
-  - component: {fileID: 1986648364}
-  m_Layer: 0
-  m_Name: PauseMenuController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1986648364
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1986648363}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ad53e5626758864a9109925a57dda16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PauseMenuController
-  pausePanel: {fileID: 0}
-  termsPanel: {fileID: 0}
-  sceneImages: {fileID: 129573672}
-  mainGameScene: Principal_Missil
-  mainMenuScene: Menu_Principal
---- !u!4 &1986648365
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1986648363}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.58926, y: -0.40198, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2036847923
 GameObject:
   m_ObjectHideFlags: 0
@@ -2712,12 +2687,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2036869666}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc0d0748088c8a64ca6b778fae48abe5, type: 3}
+  m_Script: {fileID: 11500000, guid: 4d4de13a9a68e484c9b206aa42a7a7c2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
-  missilePrefab: {fileID: 2151505837289263774, guid: f5153aec5bc58fb498a44164b5c32de3, type: 3}
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMissileSpawner_Tutorial
+  missilePrefab: {fileID: 2151505837289263774, guid: 73c619f9c9c1aca479fcf87ca5b89722, type: 3}
   Ypadding: 0.5
   excludeXMin: -8.36
   excludeXMax: -3.83
@@ -2933,27 +2908,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialController2
   meteorosNaOnda: 10
-  tempoEntreMeteoros: 1.5
-  velocidadeMeteoros: 2
+  tempoEntreMeteoros: 2
+  velocidadeMeteoros: 0.5
   spawner: {fileID: 0}
-  gameController: {fileID: 0}
-  tutorialPanel: {fileID: 0}
-  tutorialText: {fileID: 0}
-  continuarButton: {fileID: 0}
-  dialoguePanel: {fileID: 0}
-  speakerPortraitImage: {fileID: 0}
-  speakerNameText: {fileID: 0}
-  dialogueText: {fileID: 0}
-  choiceButton1: {fileID: 0}
-  choiceButton2: {fileID: 0}
-  choiceButton3: {fileID: 0}
-  choiceText1: {fileID: 0}
-  choiceText2: {fileID: 0}
-  choiceText3: {fileID: 0}
-  dialogoIntroducao: {fileID: 0}
-  dialogoPressao: {fileID: 0}
-  dialogoFinal: {fileID: 0}
-  reactionTime: 2
+  gameController: {fileID: 681989169}
+  dialogueManager: {fileID: 890590778}
+  dialogoIntroducao: {fileID: 11400000, guid: 70a811a92f7f5cc469dd73c60ab07f0d, type: 2}
+  dialogoPressao: {fileID: 11400000, guid: f9b3f26dbfd566248b37a7ad04b84e9d, type: 2}
+  dialogoFinal: {fileID: 11400000, guid: ee20f24a2f70d9b47925c1b6020b91b9, type: 2}
 --- !u!222 &96699407888619356
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3978,5 +3940,4 @@ SceneRoots:
   - {fileID: 2138852727735825913}
   - {fileID: 2140443001}
   - {fileID: 19411120}
-  - {fileID: 1986648365}
   - {fileID: 1538505593}

@@ -1425,10 +1425,11 @@ MonoBehaviour:
   proximaCena: 2ComputerIntro
   painelPrincipal: {fileID: 691608816}
   painelCreditos: {fileID: 439798777}
+  livroCreditos: {fileID: 1493383207}
   botaoJogar: {fileID: 0}
   botaoCreditos: {fileID: 0}
   botaoSair: {fileID: 0}
-  botaoVoltarCreditos: {fileID: 445235529}
+  botaoVoltarCreditos: {fileID: 0}
 --- !u!1 &1692178274
 GameObject:
   m_ObjectHideFlags: 0

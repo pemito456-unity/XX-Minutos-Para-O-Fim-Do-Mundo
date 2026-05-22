@@ -148,17 +148,32 @@ public class DialogueUITest : MonoBehaviour
     }
     
     void CreateDialogueButtons(List<DialogueChoice> choices)
+{
+    int choiceCount = Mathf.Min(choices.Count, 3);
+    ShowChoiceButtons(choiceCount);
+    
+    Button[] buttons = { choiceButton1, choiceButton2, choiceButton3 };
+    TMPro.TextMeshProUGUI[] texts = { choiceText1, choiceText2, choiceText3 };
+    
+    for (int i = 0; i < choiceCount; i++)
     {
-        int choiceCount = Mathf.Min(choices.Count, 3);
-        ShowChoiceButtons(choiceCount);
+        if (texts[i] != null)
+            texts[i].text = choices[i].buttonText;
         
-        for (int i = 0; i < choiceCount; i++)
+        if (buttons[i] != null)
         {
-            SetChoiceButtonText(i + 1, choices[i].buttonText);
+            ColorBlock colors = buttons[i].colors;
+            colors.normalColor = new Color(1f, 1f, 1f, 1f);           // BRANCO normal
+            colors.highlightedColor = new Color(0.7f, 0.7f, 0.75f, 1f);  // Cinza mais claro no hover
+            colors.pressedColor = new Color(0.4f, 0.4f, 0.45f, 1f);      // Cinza médio ao clicar
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = 0.1f;
+            buttons[i].colors = colors;
         }
-        
-        Debug.Log($" {choiceCount} botões configurados");
     }
+    
+    Debug.Log($"✅ {choiceCount} botões configurados com hover (brancos)");
+}
     
     void CreateFlashObject()
     {

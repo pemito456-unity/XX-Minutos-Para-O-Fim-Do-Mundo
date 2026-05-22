@@ -37,6 +37,9 @@ public class GameController_Def : MonoBehaviour
     
     public float GetPressurePercent() => GetTotalPressurePercent();
     
+    public int GetCurrentInvestigationProgress() => currentInvestigationProgress;
+    public int GetRequiredInvestigationProgress() => requiredInvestigationProgress;
+    
     private List<GameObject> activeDefenders = new List<GameObject>();
     private int totalDefendersCount = 0;
 
@@ -90,7 +93,7 @@ public class GameController_Def : MonoBehaviour
     {
         redPressure = Mathf.Clamp(redPressure + amount, 0, maxPressure);
         UpdatePressureUI();
-        Debug.Log($"🔴 PRESSÃO VERMELHA: +{amount} → {redPressure:F1}/{maxPressure}");
+        Debug.Log($" PRESSÃO VERMELHA: +{amount} → {redPressure:F1}/{maxPressure}");
         CheckLoseConditions();
     }
     
@@ -99,7 +102,7 @@ public class GameController_Def : MonoBehaviour
         yellowPressure = Mathf.Clamp(yellowPressure + amount, 0, maxPressure);
         UpdatePressureUI();
         string arrow = amount > 0 ? "↑" : "↓";
-        Debug.Log($"🟡 PRESSÃO AMARELA: {arrow}{Mathf.Abs(amount)} → {yellowPressure:F1}/{maxPressure}");
+        Debug.Log($" PRESSÃO AMARELA: {arrow}{Mathf.Abs(amount)} → {yellowPressure:F1}/{maxPressure}");
         CheckLoseConditions();
     }
 
@@ -162,11 +165,23 @@ public class GameController_Def : MonoBehaviour
         currentState = GameState.GameOver;
         Time.timeScale = 0f;
         
+        DestroyAllEnemyMissiles();
+        
         if (sceneImages != null) sceneImages.SetActive(false);
         if (pressurePanel != null) pressurePanel.SetActive(false);
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
         
-        Debug.Log("💀 GAME OVER!");
+        Debug.Log(" GAME OVER!");
+    }
+    
+    private void DestroyAllEnemyMissiles()
+    {
+        GameObject[] enemyMissiles = GameObject.FindGameObjectsWithTag("EnemyMissile");
+        foreach (GameObject missile in enemyMissiles)
+        {
+            Destroy(missile);
+        }
+        Debug.Log($"Destruídos {enemyMissiles.Length} mísseis inimigos");
     }
     
     public void TryAgain()
@@ -211,10 +226,12 @@ public class GameController_Def : MonoBehaviour
         currentState = GameState.Victory;
         Time.timeScale = 0f;
         
+        DestroyAllEnemyMissiles();
+        
         if (sceneImages != null) sceneImages.SetActive(false);
         if (pressurePanel != null) pressurePanel.SetActive(false);
         if (victoryPanel != null) victoryPanel.SetActive(true);
         
-        Debug.Log("🏆 VITÓRIA!");
+        Debug.Log(" VITÓRIA!");
     }
 }

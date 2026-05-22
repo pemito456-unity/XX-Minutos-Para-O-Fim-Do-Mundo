@@ -7,6 +7,7 @@ TagManager:
   - Defenders
   - Explosions
   - Ground
+  - EnemyMissile
   layers:
   - Default
   - TransparentFX
