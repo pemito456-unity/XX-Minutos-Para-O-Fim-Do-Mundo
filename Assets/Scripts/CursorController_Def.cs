@@ -5,8 +5,8 @@ public class CursorController_Def : MonoBehaviour
     [SerializeField] private GameObject missilePrefab;
     [SerializeField] private Texture2D cursorTexture;
     
-    [Header("Posição do Canhão")]
-    [SerializeField] private Vector2 cannonPosition = new Vector2(-0.12f, -3.36f); 
+    [Header("Ponto de disparo (ponta do canhão)")]
+    [SerializeField] private Transform firePoint;
     
     [Header("Áudio")]
     [SerializeField] private AudioSource audioSource;
@@ -18,32 +18,30 @@ public class CursorController_Def : MonoBehaviour
     private float lastShootTime = -1f;
 
     private GameController_Def myGameController;
+    private GameplayAreaBounds areaBounds;
 
-    [System.Obsolete]
     void Start()
     {
-        myGameController = FindObjectOfType<GameController_Def>();
+        myGameController = FindAnyObjectByType<GameController_Def>();
+        areaBounds = GameplayAreaBounds.FindInScene();
+        
+        if (firePoint == null)
+            firePoint = CannonFirePoint.Find();
         
         if (cursorTexture != null)
-        {
             Cursor.SetCursor(cursorTexture, Vector2.zero, CursorMode.Auto);
-        }
         
         if (audioSource == null)
             audioSource = GetComponent<AudioSource>();
         
-        Debug.Log($"CursorController iniciado. Posição do canhão: {cannonPosition}");
-        
         if (missilePrefab == null)
-            Debug.LogError(" MissilePrefab não está atribuído!");
+            Debug.LogError("CursorController_Def: MissilePrefab não está atribuído!");
     }
 
     void Update()
     {
         if (myGameController != null && myGameController.currentState != GameController_Def.GameState.Gameplay)
-        {
             return;
-        }
         
         if (Input.GetMouseButtonDown(0) && Time.time >= lastShootTime + shootCooldown)
         {
@@ -55,18 +53,28 @@ public class CursorController_Def : MonoBehaviour
     void Shoot()
     {
         if (missilePrefab == null)
-        {
-            Debug.LogError("MissilePrefab é NULL!");
             return;
-        }
-        
-        Vector3 spawnPosition = new Vector3(cannonPosition.x, cannonPosition.y, 0);
+
+        if (firePoint == null)
+            firePoint = CannonFirePoint.Find();
+
+        Vector3 spawnPosition = firePoint != null
+            ? firePoint.position
+            : transform.position;
+        spawnPosition.z = 0f;
+
+        Vector2 target = CannonFirePoint.GetMouseWorldPosition();
+
+        if (areaBounds != null && !areaBounds.IsWorldPositionInPlayableArea(target))
+            return;
+
         GameObject newMissile = Instantiate(missilePrefab, spawnPosition, Quaternion.identity);
-        Debug.Log($"Míssil disparado da posição: {spawnPosition}");
+
+        PlayerMissileController_Def missile = newMissile.GetComponent<PlayerMissileController_Def>();
+        if (missile != null)
+            missile.SetTarget(target);
         
         if (audioSource && shootSound)
-        {
             audioSource.PlayOneShot(shootSound, shootVolume);
-        }
     }
 }

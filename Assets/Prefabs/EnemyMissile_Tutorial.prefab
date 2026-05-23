@@ -103,10 +103,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2151505837289263774}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ab3af59eef799446b858123c3d33107, type: 3}
+  m_Script: {fileID: 11500000, guid: 7b6daeaff9ba00640814467751ee911a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
-  speed: 0.5
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMissile_Tutorial
+  speed: 2
 --- !u!58 &-429784215340545600
 CircleCollider2D:
   m_ObjectHideFlags: 0

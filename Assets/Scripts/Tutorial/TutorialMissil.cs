@@ -41,36 +41,37 @@ public class TutorialMissile : MonoBehaviour
         
         if (transform.position.y < -5f && !isDestroyed)
         {
-            isDestroyed = true;
-            if (onHitGround != null)
-                onHitGround.Invoke();
-            Destroy(gameObject);
+            DestroyProjectile(false);
         }
     }
     
     void OnMouseDown()
     {
         if (!isDestroyed)
-        {
-            isDestroyed = true;
-            if (onDestroy != null)
-                onDestroy.Invoke();
-            Destroy(gameObject);
-        }
+            DestroyProjectile(true);
     }
     
-    // 🔴 ADICIONAR: Detectar colisão com o míssil do jogador
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (isDestroyed) return;
+        if (isDestroyed)
+            return;
         
-        // Se colidiu com a explosão do jogador
         if (other.CompareTag("Explosions"))
-        {
-            isDestroyed = true;
-            if (onDestroy != null)
-                onDestroy.Invoke();
-            Destroy(gameObject);
-        }
+            DestroyProjectile(true);
+    }
+
+    void DestroyProjectile(bool contarComoDestruido)
+    {
+        if (isDestroyed)
+            return;
+        isDestroyed = true;
+
+        if (contarComoDestruido && onDestroy != null)
+            onDestroy.Invoke();
+        else if (!contarComoDestruido && onHitGround != null)
+            onHitGround.Invoke();
+
+        ExplosionSpawner.SpawnAt(transform.position);
+        Destroy(gameObject);
     }
 }

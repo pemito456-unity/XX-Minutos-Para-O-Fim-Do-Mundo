@@ -322,8 +322,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComputerIntro
   typeSpeed: 0.05
   delayBetweenLines: 1
-  typingSound: {fileID: 0}
-  nextSceneName: Principal_Missil
+  typingSound: {fileID: 8300000, guid: 85369ebee22ebd140b83cc9008b74f40, type: 3}
+  soundVolume: 0.1
+  nextSceneName: TutorialScene
 --- !u!4 &1276093687
 Transform:
   m_ObjectHideFlags: 0

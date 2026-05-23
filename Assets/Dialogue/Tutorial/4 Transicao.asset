@@ -10,21 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6cb3f5ff6b5fadc448a6545d333ba265, type: 3}
-  m_Name: 2
+  m_Name: 4 Transicao
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
-  speakerName: "Secret\xE1rio"
-  speakerType: 1
-  speakerPortrait: {fileID: -5632654425947497670, guid: f2bb9abbeaa35474492c503b7694108d, type: 3}
-  dialogueText: "Agora entenda a press\xE3o. A barra VERMELHA mostra a destrui\xE7\xE3o
-    da cidade. A barra AMARELA mostra press\xE3o pol\xEDtica."
+  speakerName: Coronel
+  speakerType: 0
+  speakerPortrait: {fileID: 7597935454189737829, guid: 184d36dd661ff3e4b9fc015f6ced2ea4, type: 3}
+  dialogueText: "Treinamento conclu\xEDdo. Estamos transferindo voc\xEA para o centro
+    de comando da capital.\n\nPrepare-se: a batalha real come\xE7a agora."
   isMandatory: 0
   timeToDecide: 15
   choices:
-  - buttonText: "Entendi. Como a press\xE3o sobe?"
+  - buttonText: Entrar em combate
     pressureChange: 0
     advancesInvestigation: 0
-    speakerReaction: "Respondendo mal aos di\xE1logos ou deixando proj\xE9teis destruirem
-      a cidade."
+    speakerReaction: "Conex\xE3o estabelecida. Boa sorte, General!"
     animationTrigger: 
     reactionSound: {fileID: 0}
     screenFlashColor: {r: 0, g: 0, b: 0, a: 0}

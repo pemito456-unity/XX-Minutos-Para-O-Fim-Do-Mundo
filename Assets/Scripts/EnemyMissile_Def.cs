@@ -6,6 +6,7 @@ public class EnemyMissile_Def : MonoBehaviour
     [SerializeField] private float speed = 3f;
     private GameObject targetCity;
     private GameController_Def gameController;
+    private bool isDestroyed;
 
     void Start()
     {
@@ -15,6 +16,9 @@ public class EnemyMissile_Def : MonoBehaviour
 
     void Update()
     {
+        if (isDestroyed)
+            return;
+
         if (targetCity != null)
         {
             transform.position = Vector2.MoveTowards(transform.position, targetCity.transform.position, speed * Time.deltaTime);
@@ -26,7 +30,8 @@ public class EnemyMissile_Def : MonoBehaviour
         else
         {
             FindNewTarget();
-            if (targetCity == null) Destroy(gameObject);
+            if (targetCity == null)
+                DestroyWithExplosion();
         }
     }
 
@@ -34,20 +39,20 @@ public class EnemyMissile_Def : MonoBehaviour
     {
         GameObject[] cities = GameObject.FindGameObjectsWithTag("Defenders");
         if (cities.Length > 0)
-        {
             targetCity = cities[Random.Range(0, cities.Length)];
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (isDestroyed)
+            return;
+
         if (collision.CompareTag("Explosions"))
         {
             if (gameController != null)
-            {
                 gameController.OnMissileIntercepted();
-            }
-            Destroy(gameObject);
+            DestroyWithExplosion();
+            return;
         }
 
         if (collision.CompareTag("Defenders"))
@@ -59,11 +64,19 @@ public class EnemyMissile_Def : MonoBehaviour
                 
                 CityScript city = collision.GetComponent<CityScript>();
                 if (city != null)
-                {
                     city.TakeDamage(1);
-                }
             }
-            Destroy(gameObject);
+            DestroyWithExplosion();
         }
+    }
+
+    public void DestroyWithExplosion()
+    {
+        if (isDestroyed)
+            return;
+        isDestroyed = true;
+
+        ExplosionSpawner.SpawnAt(transform.position);
+        Destroy(gameObject);
     }
 }

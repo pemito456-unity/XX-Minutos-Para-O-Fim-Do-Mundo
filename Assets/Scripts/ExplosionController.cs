@@ -4,7 +4,7 @@ public class ExplosionController : MonoBehaviour
 {
     [Header("Configuração")]
     [SerializeField] private AudioClip explosionSound;
-    [SerializeField] private float destroyDelay = 0.5f;
+    [SerializeField] private float destroyDelay = 0.75f;
     
     private AudioSource audioSource;
     

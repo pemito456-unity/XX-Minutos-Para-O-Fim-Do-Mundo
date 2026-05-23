@@ -5,8 +5,8 @@ public class CursorController_Tutorial : MonoBehaviour
     [SerializeField] private GameObject missilePrefab;
     [SerializeField] private Texture2D cursorTexture;
     
-    [Header("Posição do Canhão (Tutorial)")]
-    [SerializeField] private Vector2 cannonPosition = new Vector2(-0.12f, -3.36f); // 🔴 POSIÇÃO CORRETA DO TUTORIAL
+    [Header("Ponto de disparo (ponta do canhão)")]
+    [SerializeField] private Transform firePoint;
     
     [Header("Áudio")]
     [SerializeField] private AudioSource audioSource;
@@ -21,43 +21,28 @@ public class CursorController_Tutorial : MonoBehaviour
 
     void Start()
     {
-        myGameController = FindObjectOfType<GameController_Def>();
+        myGameController = FindAnyObjectByType<GameController_Def>();
+        
+        if (firePoint == null)
+            firePoint = CannonFirePoint.Find();
         
         if (cursorTexture != null)
-        {
             Cursor.SetCursor(cursorTexture, Vector2.zero, CursorMode.Auto);
-        }
         
         if (audioSource == null)
             audioSource = GetComponent<AudioSource>();
         
-        Debug.Log($"CursorController_Tutorial iniciado. Posição do canhão: {cannonPosition}");
-        Debug.Log($"MissilePrefab: {(missilePrefab != null ? missilePrefab.name : "NULL")}");
-        Debug.Log($"GameController: {(myGameController != null ? "OK" : "NULL")}");
+        if (missilePrefab == null)
+            Debug.LogError("CursorController_Tutorial: MissilePrefab não está atribuído!");
     }
 
     void Update()
     {
-        // 🔴 DEBUG: Mostra o estado a cada 60 frames
-        if (Time.frameCount % 60 == 0)
-        {
-            Debug.Log($"Estado do GameController: {myGameController?.currentState}");
-        }
-        
-        if (Input.GetMouseButtonDown(0))
-        {
-            Debug.Log($"🔴 CLIQUE DETECTADO! Estado: {myGameController?.currentState}, Time: {Time.time}, Cooldown: {lastShootTime + shootCooldown}");
-        }
-        
         if (myGameController != null && myGameController.currentState != GameController_Def.GameState.Gameplay)
-        {
-            Debug.Log($"Não atira: estado é {myGameController.currentState}");
             return;
-        }
         
         if (Input.GetMouseButtonDown(0) && Time.time >= lastShootTime + shootCooldown)
         {
-            Debug.Log("✅ CONDIÇÕES OK! Atirando...");
             lastShootTime = Time.time;
             Shoot();
         }
@@ -66,18 +51,31 @@ public class CursorController_Tutorial : MonoBehaviour
     void Shoot()
     {
         if (missilePrefab == null)
-        {
-            Debug.LogError("❌ MissilePrefab não está atribuído!");
             return;
-        }
-        
-        Vector3 spawnPosition = new Vector3(cannonPosition.x, cannonPosition.y, 0);
+
+        if (firePoint == null)
+            firePoint = CannonFirePoint.Find();
+
+        Vector3 spawnPosition = firePoint != null
+            ? firePoint.position
+            : transform.position;
+        spawnPosition.z = 0f;
+
+        Vector2 target = CannonFirePoint.GetMouseWorldPosition();
+
         GameObject newMissile = Instantiate(missilePrefab, spawnPosition, Quaternion.identity);
-        Debug.Log($"✅ Míssil tutorial disparado de: {spawnPosition}");
+
+        PlayerMissileController_Tutorial missile = newMissile.GetComponent<PlayerMissileController_Tutorial>();
+        if (missile != null)
+            missile.SetTarget(target);
+        else
+        {
+            PlayerMissileController_Def fallback = newMissile.GetComponent<PlayerMissileController_Def>();
+            if (fallback != null)
+                fallback.SetTarget(target);
+        }
         
         if (audioSource && shootSound)
-        {
             audioSource.PlayOneShot(shootSound, shootVolume);
-        }
     }
 }

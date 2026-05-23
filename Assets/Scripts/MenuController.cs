@@ -11,9 +11,8 @@ public class MenuController : MonoBehaviour
     [Header("Painéis do Menu")]
     public GameObject painelPrincipal;
     public GameObject painelCreditos;
-    public GameObject livroCreditos; // 🔴 Adicione a referência do livro separadamente
 
-    [Header("Botões (opcional - para referência)")]
+    [Header("Botões (opcional - encontrados por nome se vazios)")]
     public Button botaoJogar;
     public Button botaoCreditos;
     public Button botaoSair;
@@ -21,49 +20,49 @@ public class MenuController : MonoBehaviour
 
     void Start()
     {
+        ResolverReferencias();
         MostrarPainelPrincipal();
         ConfigurarBotoes();
     }
 
+    void ResolverReferencias()
+    {
+        if (botaoCreditos == null)
+            botaoCreditos = EncontrarBotao("ButtonCredits");
+        if (botaoVoltarCreditos == null)
+            botaoVoltarCreditos = EncontrarBotao("ButtonBack");
+        if (botaoJogar == null)
+            botaoJogar = EncontrarBotao("ButtonPlay");
+        if (botaoSair == null)
+            botaoSair = EncontrarBotao("ButtonExit");
+    }
+
+    static Button EncontrarBotao(string nome)
+    {
+        GameObject go = GameObject.Find(nome);
+        return go != null ? go.GetComponent<Button>() : null;
+    }
+
     void ConfigurarBotoes()
     {
-        // Configura botão de créditos
         if (botaoCreditos != null)
         {
             botaoCreditos.onClick.RemoveAllListeners();
             botaoCreditos.onClick.AddListener(MostrarPainelCreditos);
         }
-        
-        // Configura botão voltar dos créditos
+
         if (botaoVoltarCreditos != null)
         {
             botaoVoltarCreditos.onClick.RemoveAllListeners();
             botaoVoltarCreditos.onClick.AddListener(MostrarPainelPrincipal);
-            Debug.Log("Botão Voltar configurado!");
         }
-        else
-        {
-            // Tenta encontrar o botão dentro do painel
-            if (painelCreditos != null)
-            {
-                Button voltarBtn = painelCreditos.GetComponentInChildren<Button>();
-                if (voltarBtn != null)
-                {
-                    voltarBtn.onClick.RemoveAllListeners();
-                    voltarBtn.onClick.AddListener(MostrarPainelPrincipal);
-                    Debug.Log("Botão Voltar encontrado automaticamente!");
-                }
-            }
-        }
-        
-        // Configura botão jogar
+
         if (botaoJogar != null)
         {
             botaoJogar.onClick.RemoveAllListeners();
             botaoJogar.onClick.AddListener(MostrarPainelJogar);
         }
-        
-        // Configura botão sair
+
         if (botaoSair != null)
         {
             botaoSair.onClick.RemoveAllListeners();
@@ -73,88 +72,38 @@ public class MenuController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (painelCreditos != null && painelCreditos.activeSelf)
-            {
-                MostrarPainelPrincipal();
-                Debug.Log("ESC pressionado: voltando ao menu principal");
-            }
-        }
+        if (Input.GetKeyDown(KeyCode.Escape) && painelCreditos != null && painelCreditos.activeSelf)
+            MostrarPainelPrincipal();
     }
 
     public void MostrarPainelPrincipal()
     {
-        DesativarTodosOsPaineis();
-        
-        if (painelPrincipal != null) 
-        {
+        if (painelCreditos != null)
+            painelCreditos.SetActive(false);
+
+        if (painelPrincipal != null)
             painelPrincipal.SetActive(true);
-            Debug.Log("Painel principal ativado");
-        }
     }
 
     public void MostrarPainelJogar()
     {
         if (!string.IsNullOrEmpty(proximaCena))
-        {
-            Debug.Log($"Carregando cena: {proximaCena}");
             SceneManager.LoadScene(proximaCena);
-        }
         else
-        {
             Debug.LogError("O nome da próxima cena não foi definido no Inspector!");
-        }
     }
 
     public void MostrarPainelCreditos()
     {
-        Debug.Log("=== MOSTRANDO CRÉDITOS ===");
-        
-        // Primeiro, desativa tudo
-        if (painelPrincipal != null) painelPrincipal.SetActive(false);
-        
-        // Ativa o painel de créditos
+        if (painelPrincipal != null)
+            painelPrincipal.SetActive(false);
+
         if (painelCreditos != null)
-        {
             painelCreditos.SetActive(true);
-            Debug.Log($"Painel de créditos ativado. ActiveSelf: {painelCreditos.activeSelf}");
-        }
-        
-        // 🔴 GARANTE QUE O LIVRO ESTÁ ATIVO
-        if (livroCreditos != null)
-        {
-            livroCreditos.SetActive(true);
-            Debug.Log($"Livro de créditos ativado. ActiveSelf: {livroCreditos.activeSelf}");
-        }
-        else
-        {
-            // Se não tem referência separada, tenta encontrar
-            if (painelCreditos != null)
-            {
-                Transform livro = painelCreditos.transform.Find("Livro Creditos");
-                if (livro != null)
-                {
-                    livro.gameObject.SetActive(true);
-                    Debug.Log("Livro de créditos encontrado e ativado!");
-                }
-                else
-                {
-                    Debug.LogWarning("'Livro Creditos' não encontrado como filho do painelCreditos!");
-                }
-            }
-        }
     }
 
     public void SairDoJogo()
     {
-        Debug.Log("Saindo do jogo...");
         Application.Quit();
-    }
-
-    private void DesativarTodosOsPaineis()
-    {
-        if (painelPrincipal != null) painelPrincipal.SetActive(false);
-        if (painelCreditos != null) painelCreditos.SetActive(false);
     }
 }

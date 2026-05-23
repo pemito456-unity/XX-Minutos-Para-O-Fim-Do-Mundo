@@ -87,13 +87,16 @@ public class DialogueUITutorial : MonoBehaviour
     {
         int choiceCount = Mathf.Min(choices.Count, 3);
         ShowChoiceButtons(choiceCount);
-        
+
+        Button[] buttons = { choiceButton1, choiceButton2, choiceButton3 };
+
         for (int i = 0; i < choiceCount; i++)
         {
             SetChoiceButtonText(i + 1, choices[i].buttonText);
+            DialogueButtonStyling.ApplyChoiceButtonHover(buttons[i]);
         }
-        
-        Debug.Log($"Tutorial: {choiceCount} botões configurados");
+
+        Debug.Log($"Tutorial: {choiceCount} botões configurados com hover");
     }
     
     public void ShowDialogue(DialogueData dialogue, System.Action onComplete = null)

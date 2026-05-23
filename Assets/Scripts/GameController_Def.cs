@@ -27,6 +27,12 @@ public class GameController_Def : MonoBehaviour
     [SerializeField] private GameObject victoryPanel;
     [SerializeField] private GameObject sceneImages;
     
+    [Header("Feedback de Pressão")]
+    [SerializeField] private AudioSource pressureAudioSource;
+    [SerializeField] private AudioClip pressureRiseClip;
+    [SerializeField] private Color pressureFlashColor = new Color(1f, 0.85f, 0.1f, 1f);
+    [SerializeField] private float pressureFlashDuration = 0.35f;
+
     [Header("Configuração de Cenas")]
     [SerializeField] private string mainGameScene = "MainGame";
     [SerializeField] private string mainMenuScene = "MainMenu";
@@ -97,18 +103,33 @@ public class GameController_Def : MonoBehaviour
         CheckLoseConditions();
     }
     
-    public void AddYellowPressure(float amount)
+    public void AddYellowPressure(float amount, bool playFeedback = true)
     {
+        if (Mathf.Approximately(amount, 0f))
+            return;
+
         yellowPressure = Mathf.Clamp(yellowPressure + amount, 0, maxPressure);
         UpdatePressureUI();
         string arrow = amount > 0 ? "↑" : "↓";
         Debug.Log($" PRESSÃO AMARELA: {arrow}{Mathf.Abs(amount)} → {yellowPressure:F1}/{maxPressure}");
+
+        if (playFeedback && amount > 0f)
+            PlayPressureRiseFeedback();
+
         CheckLoseConditions();
+    }
+
+    private void PlayPressureRiseFeedback()
+    {
+        DialogueFeedback.TriggerScreenFlash(pressureFlashColor, pressureFlashDuration);
+
+        if (pressureAudioSource != null && pressureRiseClip != null)
+            pressureAudioSource.PlayOneShot(pressureRiseClip);
     }
 
     public void ModifyPressureByDialogue(float amount)
     {
-        AddYellowPressure(amount);
+        AddYellowPressure(amount, playFeedback: false);
     }
     
     public void OnDefenderDestroyed(GameObject destroyedDefender)

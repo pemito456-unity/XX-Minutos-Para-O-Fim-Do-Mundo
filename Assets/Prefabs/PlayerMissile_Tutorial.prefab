@@ -102,10 +102,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4773340915951372779}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d22579f266e146d4e918c36f249aef10, type: 3}
+  m_Script: {fileID: 11500000, guid: 4079b124de4f47b4cb410ea9b787fd8d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMissileController_Def
-  speed: 5
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMissileController_Tutorial
+  speed: 8
   explosionPrefab: {fileID: 4159878286275772821, guid: a0706858313e69441a5272da09f3957d, type: 3}
 --- !u!58 &-4693611551985533698
 CircleCollider2D:

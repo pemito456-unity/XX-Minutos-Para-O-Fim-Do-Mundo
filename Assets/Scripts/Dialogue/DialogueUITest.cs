@@ -38,8 +38,13 @@ public class DialogueUITest : MonoBehaviour
     
     [Header("Efeitos de Tela")]
     [SerializeField] private Canvas targetCanvas;
+
+    [Header("Telefone")]
+    [SerializeField] private GameObject phoneButtonObject;
+    [SerializeField] private GameObject phoneButtonPrefab;
     
     private GameController_Def gameController;
+    private List<DialogueChoice> shuffledChoices = new List<DialogueChoice>();
     private Queue<DialogueData> pendingDialogues = new Queue<DialogueData>();
     private DialogueData currentDialogue;
     private bool isDialogueActive = false;
@@ -57,10 +62,16 @@ public class DialogueUITest : MonoBehaviour
     void Start()
     {
         gameController = Object.FindAnyObjectByType<GameController_Def>();
-        
+
+        GarantirBotaoTelefone();
+        ApplyPhoneButtonHover();
+
         if (dialoguePanel != null)
             dialoguePanel.SetActive(false);
-        
+
+        if (phoneButtonObject != null)
+            phoneButtonObject.SetActive(false);
+
         CreateFlashObject();
         SetupButtons();
         
@@ -103,10 +114,8 @@ public class DialogueUITest : MonoBehaviour
         
         Debug.Log($" Botão {buttonIndex + 1} clicado! ================");
         
-        if (currentDialogue != null && buttonIndex < currentDialogue.choices.Count)
-        {
-            OnChoiceSelected(currentDialogue.choices[buttonIndex]);
-        }
+        if (buttonIndex >= 0 && buttonIndex < shuffledChoices.Count)
+            OnChoiceSelected(shuffledChoices[buttonIndex]);
     }
     
     void Update()
@@ -148,33 +157,36 @@ public class DialogueUITest : MonoBehaviour
     }
     
     void CreateDialogueButtons(List<DialogueChoice> choices)
-{
-    int choiceCount = Mathf.Min(choices.Count, 3);
-    ShowChoiceButtons(choiceCount);
-    
-    Button[] buttons = { choiceButton1, choiceButton2, choiceButton3 };
-    TMPro.TextMeshProUGUI[] texts = { choiceText1, choiceText2, choiceText3 };
-    
-    for (int i = 0; i < choiceCount; i++)
     {
-        if (texts[i] != null)
-            texts[i].text = choices[i].buttonText;
-        
-        if (buttons[i] != null)
+        shuffledChoices = EmbaralharLista(choices);
+        int choiceCount = Mathf.Min(shuffledChoices.Count, 3);
+        ShowChoiceButtons(choiceCount);
+
+        Button[] buttons = { choiceButton1, choiceButton2, choiceButton3 };
+        TMPro.TextMeshProUGUI[] texts = { choiceText1, choiceText2, choiceText3 };
+
+        for (int i = 0; i < choiceCount; i++)
         {
-            ColorBlock colors = buttons[i].colors;
-            colors.normalColor = new Color(1f, 1f, 1f, 1f);           // BRANCO normal
-            colors.highlightedColor = new Color(0.7f, 0.7f, 0.75f, 1f);  // Cinza mais claro no hover
-            colors.pressedColor = new Color(0.4f, 0.4f, 0.45f, 1f);      // Cinza médio ao clicar
-            colors.colorMultiplier = 1f;
-            colors.fadeDuration = 0.1f;
-            buttons[i].colors = colors;
+            if (texts[i] != null)
+                texts[i].text = shuffledChoices[i].buttonText;
+
+            DialogueButtonStyling.ApplyChoiceButtonHover(buttons[i]);
         }
+
+        Debug.Log($"✅ {choiceCount} botões configurados (ordem aleatória)");
     }
-    
-    Debug.Log($"✅ {choiceCount} botões configurados com hover (brancos)");
-}
-    
+
+    static List<DialogueChoice> EmbaralharLista(List<DialogueChoice> original)
+    {
+        List<DialogueChoice> lista = new List<DialogueChoice>(original);
+        for (int i = lista.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (lista[i], lista[j]) = (lista[j], lista[i]);
+        }
+        return lista;
+    }
+
     void CreateFlashObject()
     {
         if (targetCanvas == null)
@@ -333,12 +345,11 @@ public class DialogueUITest : MonoBehaviour
             Debug.Log("🔊 Áudio do telefone começou a tocar");
         }
         
-        Debug.Log(" Abrindo diálogo...");
-        
+        if (phoneButtonObject != null)
+            phoneButtonObject.SetActive(true);
+
         if (ringingCoroutine != null) StopCoroutine(ringingCoroutine);
         ringingCoroutine = StartCoroutine(RingingTimerCoroutine());
-        
-        AnswerPhone();
     }
     
     IEnumerator RingingTimerCoroutine()
@@ -371,32 +382,40 @@ public class DialogueUITest : MonoBehaviour
     
     void StopRinging()
     {
-        Debug.Log("Telefone parou de tocar (StopRinging)");
         isRinging = false;
-        
+
+        if (phoneButtonObject != null)
+            phoneButtonObject.SetActive(false);
+
         if (ringingCoroutine != null)
         {
             StopCoroutine(ringingCoroutine);
             ringingCoroutine = null;
         }
+
     }
     
     public void AnswerPhone()
     {
-        Debug.Log($"Atendendo chamada! pending={pendingDialogues.Count}");
-        
         if (!isDialogueActive && pendingDialogues.Count > 0)
         {
-            Debug.Log("Iniciando diálogo!");
-            
             isRinging = false;
-            
+
+            if (phoneButtonObject != null)
+                phoneButtonObject.SetActive(false);
+
             if (ringingCoroutine != null)
             {
                 StopCoroutine(ringingCoroutine);
                 ringingCoroutine = null;
             }
-            
+
+            if (phoneAudioSource != null && phoneAudioSource.isPlaying)
+            {
+                phoneAudioSource.Stop();
+                phoneAudioSource.loop = false;
+            }
+
             currentDialogue = pendingDialogues.Dequeue();
             StartDialogue();
         }
@@ -413,7 +432,7 @@ public class DialogueUITest : MonoBehaviour
         Debug.Log($"Iniciando diálogo: {currentDialogue.speakerName}");
         
         isDialogueActive = true;
-        
+
         if (dialoguePanel != null)
         {
             dialoguePanel.SetActive(true);
@@ -485,9 +504,8 @@ public class DialogueUITest : MonoBehaviour
                 gameController.AdvanceInvestigation();
         }
         
-        if (choice.screenFlashColor != null && choice.screenFlashColor.a > 0)
-            TriggerScreenFlash(choice.screenFlashColor, choice.screenFlashDuration);
-        
+        PlayChoicePressureFlash(choice.pressureChange);
+
         StartCoroutine(ShowReactionAndClose(choice));
     }
     
@@ -536,7 +554,8 @@ public class DialogueUITest : MonoBehaviour
         currentDialogue = null;
         
         HideAllChoiceButtons();
-        
+        shuffledChoices.Clear();
+
         if (phoneAudioSource != null && phoneAudioSource.isPlaying)
         {
             phoneAudioSource.Stop();
@@ -592,4 +611,61 @@ public class DialogueUITest : MonoBehaviour
     }
     
     public bool IsRinging() => isRinging;
+
+    void GarantirBotaoTelefone()
+    {
+        if (phoneButtonObject != null)
+            return;
+
+        PhoneButton existente = Object.FindAnyObjectByType<PhoneButton>();
+        if (existente != null)
+        {
+            phoneButtonObject = existente.gameObject;
+            return;
+        }
+
+        if (phoneButtonPrefab == null)
+            return;
+
+        Transform parent = null;
+        if (dialoguePanel != null)
+            parent = dialoguePanel.transform.parent;
+
+        if (parent == null && targetCanvas != null)
+            parent = targetCanvas.transform;
+
+        if (parent == null)
+        {
+            Canvas canvas = Object.FindAnyObjectByType<Canvas>();
+            if (canvas != null)
+                parent = canvas.transform;
+        }
+
+        if (parent == null)
+            return;
+
+        phoneButtonObject = Instantiate(phoneButtonPrefab, parent);
+        phoneButtonObject.SetActive(false);
+        ApplyPhoneButtonHover();
+    }
+
+    void ApplyPhoneButtonHover()
+    {
+        if (phoneButtonObject == null)
+            return;
+
+        Button phoneButton = phoneButtonObject.GetComponent<Button>();
+        DialogueButtonStyling.ApplyChoiceButtonHover(phoneButton);
+    }
+
+    void PlayChoicePressureFlash(float pressureChange)
+    {
+        if (Mathf.Approximately(pressureChange, 0f))
+            return;
+
+        if (pressureChange > 0f)
+            TriggerScreenFlash(new Color(1f, 0.12f, 0.08f, 1f), 0.35f);
+        else
+            TriggerScreenFlash(new Color(1f, 0.92f, 0.12f, 1f), 0.35f);
+    }
 }

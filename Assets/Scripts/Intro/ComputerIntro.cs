@@ -10,6 +10,7 @@ public class ComputerIntro : MonoBehaviour
     [SerializeField] private float delayBetweenLines = 1f;
     
     [Header("Áudio")]
+    [Tooltip("Som curto de tecla (recomendado < 0,3s). Clipes longos só tocam de novo após terminar.")]
     [SerializeField] private AudioClip typingSound;
     [SerializeField] private float soundVolume = 0.1f;
     
@@ -20,6 +21,7 @@ public class ComputerIntro : MonoBehaviour
     private Text computerText;
     private Text alastairText;
     private GameObject introPanel;
+    private float nextTypingSoundAllowedTime;
     
     // Acumuladores de texto
     private StringBuilder computerFullText = new StringBuilder();
@@ -47,10 +49,27 @@ public class ComputerIntro : MonoBehaviour
         "Isso é absurdo!"
     };
     
+    void Awake()
+    {
+        SetupAudioSource();
+    }
+
     void Start()
     {
         CreateUI();
         currentRoutine = StartCoroutine(RunIntro());
+    }
+
+    void SetupAudioSource()
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+
+        audioSource.playOnAwake = false;
+        audioSource.loop = false;
+        audioSource.clip = null;
+        audioSource.volume = soundVolume;
     }
     
     void Update()
@@ -71,10 +90,11 @@ public class ComputerIntro : MonoBehaviour
         
         // Para a corrotina atual
         if (currentRoutine != null)
-        {
             StopCoroutine(currentRoutine);
-        }
-        
+
+        if (audioSource != null)
+            audioSource.Stop();
+
         // Carrega a próxima cena diretamente (sem fade)
         if (!string.IsNullOrEmpty(nextSceneName))
         {
@@ -167,11 +187,6 @@ public class ComputerIntro : MonoBehaviour
         skipRect.offsetMin = new Vector2(0, 20);
         skipRect.offsetMax = new Vector2(-30, 60);
         
-        // 5. Cria o AudioSource
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.playOnAwake = false;
-        audioSource.volume = soundVolume;
-        
         Debug.Log("UI criada com sucesso!");
     }
     
@@ -198,18 +213,19 @@ public class ComputerIntro : MonoBehaviour
             
             computerFullText.Append(computerLines[i]);
             
-            // Digita a frase atual (mantendo as anteriores)
-            yield return StartCoroutine(TypeLine(computerText, computerFullText.ToString(), computerLines[i]));
-            
+            yield return StartCoroutine(TypeLine(computerText, computerFullText.ToString(), computerLines[i], playTypingSound: true));
+            StopIntroAudio();
+
             if (!skipRequested)
                 yield return new WaitForSeconds(delayBetweenLines);
         }
         
         if (skipRequested) yield break;
-        
+
+        StopIntroAudio();
         yield return new WaitForSeconds(0.8f);
         
-        // 🔴 ALASTAIR - Acumula frases
+        // ALASTAIR — sem áudio
         for (int i = 0; i < alastairLines.Length; i++)
         {
             if (skipRequested) yield break;
@@ -221,7 +237,7 @@ public class ComputerIntro : MonoBehaviour
             
             alastairFullText.Append(alastairLines[i]);
             
-            yield return StartCoroutine(TypeLine(alastairText, alastairFullText.ToString(), alastairLines[i]));
+            yield return StartCoroutine(TypeLine(alastairText, alastairFullText.ToString(), alastairLines[i], playTypingSound: false));
             
             if (!skipRequested)
                 yield return new WaitForSeconds(delayBetweenLines * 0.7f);
@@ -243,7 +259,7 @@ public class ComputerIntro : MonoBehaviour
         }
     }
     
-    IEnumerator TypeLine(Text textComponent, string fullText, string newLine)
+    IEnumerator TypeLine(Text textComponent, string fullText, string newLine, bool playTypingSound)
     {
         // Calcula o texto que já estava lá (sem a nova linha)
         string existingText = fullText.Substring(0, fullText.Length - newLine.Length);
@@ -261,15 +277,34 @@ public class ComputerIntro : MonoBehaviour
             string typedPart = newLine.Substring(0, i);
             textComponent.text = existingText + typedPart;
             
-            // Toca som de digitação (a cada 2 letras)
-            if (typingSound != null && audioSource != null && i % 2 == 0 && i > 0)
-            {
-                audioSource.PlayOneShot(typingSound, soundVolume);
-            }
-            
+            if (playTypingSound && i % 2 == 0 && i > 0)
+                TryPlayTypingSound();
+
             yield return new WaitForSeconds(typeSpeed);
         }
         
         yield return new WaitForSeconds(0.2f);
+    }
+
+    void TryPlayTypingSound()
+    {
+        if (typingSound == null || audioSource == null)
+            return;
+
+        float now = Time.unscaledTime;
+        if (now < nextTypingSoundAllowedTime)
+            return;
+
+        float minGap = Mathf.Max(0.1f, typingSound.length);
+        nextTypingSoundAllowedTime = now + minGap;
+        audioSource.PlayOneShot(typingSound, soundVolume);
+    }
+
+    void StopIntroAudio()
+    {
+        if (audioSource != null)
+            audioSource.Stop();
+
+        nextTypingSoundAllowedTime = 0f;
     }
 }

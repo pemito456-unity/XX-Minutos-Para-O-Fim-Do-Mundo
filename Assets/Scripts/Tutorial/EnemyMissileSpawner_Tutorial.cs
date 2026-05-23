@@ -14,57 +14,91 @@ public class EnemyMissileSpawner_Tutorial : MonoBehaviour
     [SerializeField] private float safeMargin = 0.2f;
 
     [Header("Configuração de Spawn (Tutorial)")]
-    [SerializeField] private float spawnY = -2f;
+    [SerializeField] private float spawnY = 3f;
+    
+    [Header("Velocidade dos Meteoros")]
+    [SerializeField] private float missileSpeed = 2f;
 
     private float minX, maxX;
     public float delayBetweenMissiles = 1.5f;
-    private GameController_Def gameController;
+
+    private bool isSpawning;
+    private Coroutine spawnCoroutine;
 
     void Awake()
     {
-        Debug.Log("Awake: Iniciando Spawner do TUTORIAL");
-        
         minX = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0)).x;
         maxX = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
-        
-        Debug.Log($"Limites da tela: minX={minX}, maxX={maxX}");
-        Debug.Log($"Área excluída: {excludeXMin} até {excludeXMax}");
-        
-        gameController = Object.FindAnyObjectByType<GameController_Def>();
-        
+
         if (missilePrefab == null)
+            Debug.LogError("EnemyMissileSpawner_Tutorial: missilePrefab não está atribuído!");
+    }
+
+    public void SetMissileSpeed(float speed)
+    {
+        missileSpeed = speed;
+    }
+
+    public void StartSpawning()
+    {
+        if (isSpawning)
+            return;
+
+        isSpawning = true;
+        spawnCoroutine = StartCoroutine(SpawnMissilesLoop());
+        Debug.Log("Spawn de meteoros do tutorial iniciado!");
+    }
+
+    public void StopSpawning()
+    {
+        isSpawning = false;
+
+        if (spawnCoroutine != null)
         {
-            Debug.LogError("ERRO: missilePrefab não está atribuído no Inspector!");
+            StopCoroutine(spawnCoroutine);
+            spawnCoroutine = null;
         }
-        
-        // SPAWN DESLIGADO POR PADRÃO NO TUTORIAL
-        // Será ativado pelo TutorialController quando necessário
-        enabled = false;
+
+        Debug.Log("Spawn de meteoros do tutorial parado!");
     }
 
     private IEnumerator SpawnMissilesLoop()
-{
-    while (true) 
     {
-        yield return new WaitForSeconds(delayBetweenMissiles);
-        
+        SpawnOneMissile();
+
+        while (isSpawning)
+        {
+            yield return new WaitForSeconds(delayBetweenMissiles);
+            if (!isSpawning)
+                break;
+
+            SpawnOneMissile();
+        }
+    }
+
+    private void SpawnOneMissile()
+    {
         float spawnX = GetRandomXExcludingInterface();
-        
+
         if (IsXInForbiddenArea(spawnX))
         {
             Debug.LogWarning($"X={spawnX} está na área proibida! Recusando spawn.");
-            continue; 
+            return;
         }
-        
+
         Vector3 spawnPosition = new Vector3(spawnX, spawnY + Ypadding, 0);
 
-        if (missilePrefab != null) 
-        {
-            Instantiate(missilePrefab, spawnPosition, Quaternion.identity);
-            Debug.Log($"Míssil tutorial spawnado em X: {spawnX} ✓");
-        }
+        if (missilePrefab == null)
+            return;
+
+        GameObject newMissile = Instantiate(missilePrefab, spawnPosition, Quaternion.identity);
+
+        EnemyMissile_Tutorial tutorialMissile = newMissile.GetComponent<EnemyMissile_Tutorial>();
+        if (tutorialMissile != null)
+            tutorialMissile.SetSpeed(missileSpeed);
+
+        Debug.Log($"Meteoro tutorial spawnado em {spawnPosition}");
     }
-}
 
     private float GetRandomXExcludingInterface()
     {
@@ -72,36 +106,19 @@ public class EnemyMissileSpawner_Tutorial : MonoBehaviour
         float rightAreaWidth = maxX - (excludeXMax + safeMargin);
         float totalFreeWidth = leftAreaWidth + rightAreaWidth;
 
-        Debug.Log($"LeftArea: {leftAreaWidth}, RightArea: {rightAreaWidth}, Total: {totalFreeWidth}");
-
-        if (totalFreeWidth <= 0) return Random.Range(minX, maxX);
+        if (totalFreeWidth <= 0)
+            return Random.Range(minX, maxX);
 
         if (Random.Range(0, totalFreeWidth) < leftAreaWidth)
             return Random.Range(minX, excludeXMin - safeMargin);
-        else
-            return Random.Range(excludeXMax + safeMargin, maxX);
+
+        return Random.Range(excludeXMax + safeMargin, maxX);
     }
     
     private bool IsXInForbiddenArea(float x)
     {
         float forbiddenStart = excludeXMin - safeMargin;
         float forbiddenEnd = excludeXMax + safeMargin;
-        
-        return (x >= forbiddenStart && x <= forbiddenEnd);
-    }
-    
-    // Método para ligar o spawn quando necessário
-    public void StartSpawning()
-    {
-        enabled = true;
-        StartCoroutine(SpawnMissilesLoop());
-        Debug.Log("Spawn de meteoros do tutorial iniciado!");
-    }
-    
-    // Método para desligar o spawn
-    public void StopSpawning()
-    {
-        enabled = false;
-        Debug.Log("Spawn de meteoros do tutorial parado!");
+        return x >= forbiddenStart && x <= forbiddenEnd;
     }
 }

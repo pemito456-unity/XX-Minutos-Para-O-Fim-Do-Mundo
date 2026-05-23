@@ -23,7 +23,7 @@ MonoBehaviour:
   - buttonText: Estou pronto, Coronel.
     pressureChange: 0
     advancesInvestigation: 0
-    speakerReaction: "Excelente! Vamos come\xE7ar com os meteoros."
+    speakerReaction: "Excelente! Vamos come\xE7ar com os proj\xE9teis."
     animationTrigger: 
     reactionSound: {fileID: 0}
     screenFlashColor: {r: 0, g: 0, b: 0, a: 0}

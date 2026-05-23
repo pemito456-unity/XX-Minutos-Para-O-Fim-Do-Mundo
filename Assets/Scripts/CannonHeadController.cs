@@ -25,8 +25,7 @@ public class CannonHeadController : MonoBehaviour
     void RotateToMouse()
     {
         // Pega a posição do mouse no mundo
-        Vector3 mousePos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = 0;
+        Vector3 mousePos = CannonFirePoint.GetMouseWorldPosition(mainCamera);
         
         // Calcula direção do canhão para o mouse
         Vector2 direction = mousePos - transform.position;

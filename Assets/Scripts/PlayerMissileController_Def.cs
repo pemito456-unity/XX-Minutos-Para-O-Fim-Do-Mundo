@@ -1,60 +1,147 @@
 using UnityEngine;
 
+
+
 public class PlayerMissileController_Def : MonoBehaviour
+
 {
+
     private Vector2 target;
-    [SerializeField] private float speed = 8f;
-    [SerializeField] private GameObject explosionPrefab;
+
+    private bool targetSet;
+
     
-    private bool hasExploded = false;
+
+    [SerializeField] private float speed = 8f;
+
+    [SerializeField] private GameObject explosionPrefab;
+
+    
+
+    private bool hasExploded;
+
     private GameController_Def gameController;
 
-    void Start()
+
+
+    public void SetTarget(Vector2 worldTarget)
+
     {
-        gameController = Object.FindAnyObjectByType<GameController_Def>();
-        
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        target = new Vector2(mousePos.x, mousePos.y);
-        
-        Debug.Log($"Míssel spawnado em: {transform.position}, alvo: {target}");
-        
-        Destroy(gameObject, 5f);
+
+        target = worldTarget;
+
+        targetSet = true;
+
     }
 
-    void Update()
+
+
+    void Start()
+
     {
-        if (hasExploded) return;
+
+        gameController = Object.FindAnyObjectByType<GameController_Def>();
+
         
-        transform.position = Vector2.MoveTowards(transform.position, target, speed * Time.deltaTime);
-        
-        if (Vector2.Distance(transform.position, target) < 0.05f)
-        {
-            Explode();
-        }
-    }
-    
-    void Explode()
-    {
-        if (hasExploded) return;
-        hasExploded = true;
-        
+
         if (explosionPrefab != null)
-        {
-            GameObject explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
-            Destroy(explosion, 0.5f);
-        }
+
+            ExplosionSpawner.RegisterPrefab(explosionPrefab);
+
         
-        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 0.5f);
-        foreach (var hit in hitColliders)
-        {
-            if (hit.CompareTag("EnemyMissile"))
-            {
-                Destroy(hit.gameObject);
-                if (gameController != null)
-                    gameController.OnMissileIntercepted();
-            }
-        }
+
+        if (!targetSet)
+
+            target = CannonFirePoint.GetMouseWorldPosition();
+
         
-        Destroy(gameObject);
+
+        Destroy(gameObject, 5f);
+
     }
+
+
+
+    void Update()
+
+    {
+
+        if (hasExploded)
+
+            return;
+
+        
+
+        transform.position = Vector2.MoveTowards(transform.position, target, speed * Time.deltaTime);
+
+        
+
+        if (Vector2.Distance(transform.position, target) < 0.05f)
+
+            Explode();
+
+    }
+
+    
+
+    void Explode()
+
+    {
+
+        if (hasExploded)
+
+            return;
+
+        hasExploded = true;
+
+        
+
+        ExplosionSpawner.SpawnAt(transform.position);
+
+        
+
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 0.5f);
+
+        foreach (var hit in hitColliders)
+
+        {
+
+            if (!hit.CompareTag("EnemyMissile"))
+
+                continue;
+
+
+
+            EnemyMissile_Def enemy = hit.GetComponent<EnemyMissile_Def>();
+
+            if (enemy != null)
+
+                enemy.DestroyWithExplosion();
+
+            else
+
+            {
+
+                ExplosionSpawner.SpawnAt(hit.transform.position);
+
+                Destroy(hit.gameObject);
+
+            }
+
+
+
+            if (gameController != null)
+
+                gameController.OnMissileIntercepted();
+
+        }
+
+        
+
+        Destroy(gameObject);
+
+    }
+
 }
+
+
