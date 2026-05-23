@@ -18,11 +18,27 @@ public class MenuController : MonoBehaviour
     public Button botaoSair;
     public Button botaoVoltarCreditos;
 
+    [Header("Áudio")]
+    [SerializeField] private AudioSource musicAudioSource;
+    [SerializeField] private AudioClip backgroundMusicClip;
+    [SerializeField] [Range(0f, 1f)] private float backgroundMusicVolume = 0.5f;
+    [SerializeField] private AudioSource responseFeedbackAudioSource;
+    [SerializeField] private AudioClip positiveResponseClip;
+    [SerializeField] private AudioClip negativeResponseClip;
+    [SerializeField] [Range(0f, 1f)] private float responseFeedbackVolume = 1f;
+
     void Start()
     {
+        GarantirAudioSources();
         ResolverReferencias();
         MostrarPainelPrincipal();
         ConfigurarBotoes();
+        PlayBackgroundMusic();
+    }
+
+    void OnDestroy()
+    {
+        StopBackgroundMusic();
     }
 
     void ResolverReferencias()
@@ -105,5 +121,68 @@ public class MenuController : MonoBehaviour
     public void SairDoJogo()
     {
         Application.Quit();
+    }
+
+    void GarantirAudioSources()
+    {
+        if (musicAudioSource == null)
+        {
+            musicAudioSource = gameObject.AddComponent<AudioSource>();
+            musicAudioSource.playOnAwake = false;
+            musicAudioSource.loop = true;
+        }
+
+        if (responseFeedbackAudioSource == null)
+        {
+            foreach (AudioSource source in GetComponents<AudioSource>())
+            {
+                if (source != musicAudioSource)
+                {
+                    responseFeedbackAudioSource = source;
+                    break;
+                }
+            }
+
+            if (responseFeedbackAudioSource == null)
+                responseFeedbackAudioSource = gameObject.AddComponent<AudioSource>();
+
+            responseFeedbackAudioSource.playOnAwake = false;
+            responseFeedbackAudioSource.loop = false;
+        }
+    }
+
+    public void PlayBackgroundMusic()
+    {
+        if (backgroundMusicClip == null || musicAudioSource == null)
+            return;
+
+        musicAudioSource.clip = backgroundMusicClip;
+        musicAudioSource.volume = backgroundMusicVolume;
+        musicAudioSource.loop = true;
+
+        if (!musicAudioSource.isPlaying)
+            musicAudioSource.Play();
+    }
+
+    public void StopBackgroundMusic()
+    {
+        if (musicAudioSource != null && musicAudioSource.isPlaying)
+            musicAudioSource.Stop();
+    }
+
+    public void PlayPositiveResponseFeedbackSound()
+    {
+        if (positiveResponseClip == null || responseFeedbackAudioSource == null)
+            return;
+
+        responseFeedbackAudioSource.PlayOneShot(positiveResponseClip, responseFeedbackVolume);
+    }
+
+    public void PlayNegativeResponseFeedbackSound()
+    {
+        if (negativeResponseClip == null || responseFeedbackAudioSource == null)
+            return;
+
+        responseFeedbackAudioSource.PlayOneShot(negativeResponseClip, responseFeedbackVolume);
     }
 }

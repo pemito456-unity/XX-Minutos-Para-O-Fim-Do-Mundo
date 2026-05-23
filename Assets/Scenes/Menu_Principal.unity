@@ -1425,10 +1425,17 @@ MonoBehaviour:
   proximaCena: 2ComputerIntro
   painelPrincipal: {fileID: 691608816}
   painelCreditos: {fileID: 439798777}
-  botaoJogar: {fileID: 0}
-  botaoCreditos: {fileID: 0}
+  botaoJogar: {fileID: 1134883394}
+  botaoCreditos: {fileID: 1692178276}
   botaoSair: {fileID: 0}
-  botaoVoltarCreditos: {fileID: 0}
+  botaoVoltarCreditos: {fileID: 445235529}
+  musicAudioSource: {fileID: 0}
+  backgroundMusicClip: {fileID: 0}
+  backgroundMusicVolume: 0.5
+  responseFeedbackAudioSource: {fileID: 0}
+  positiveResponseClip: {fileID: 0}
+  negativeResponseClip: {fileID: 0}
+  responseFeedbackVolume: 1
 --- !u!1 &1692178274
 GameObject:
   m_ObjectHideFlags: 0

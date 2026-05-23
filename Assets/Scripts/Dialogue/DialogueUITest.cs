@@ -35,6 +35,12 @@ public class DialogueUITest : MonoBehaviour
     [Header("Áudio")]
     [SerializeField] private AudioSource phoneAudioSource;
     [SerializeField] private AudioClip phoneRingingClip;
+
+    [Header("Feedback Sonoro das Respostas")]
+    [SerializeField] private AudioSource responseFeedbackAudioSource;
+    [SerializeField] private AudioClip positiveResponseClip;
+    [SerializeField] private AudioClip negativeResponseClip;
+    [SerializeField] [Range(0f, 1f)] private float responseFeedbackVolume = 1f;
     
     [Header("Efeitos de Tela")]
     [SerializeField] private Canvas targetCanvas;
@@ -62,6 +68,7 @@ public class DialogueUITest : MonoBehaviour
     void Start()
     {
         gameController = Object.FindAnyObjectByType<GameController_Def>();
+        GarantirAudioSourceResposta();
 
         GarantirBotaoTelefone();
         ApplyPhoneButtonHover();
@@ -664,8 +671,55 @@ public class DialogueUITest : MonoBehaviour
             return;
 
         if (pressureChange > 0f)
+        {
             TriggerScreenFlash(new Color(1f, 0.12f, 0.08f, 1f), 0.35f);
+            PlayNegativeResponseFeedbackSound();
+        }
         else
+        {
             TriggerScreenFlash(new Color(1f, 0.92f, 0.12f, 1f), 0.35f);
+            PlayPositiveResponseFeedbackSound();
+        }
+    }
+
+    void GarantirAudioSourceResposta()
+    {
+        if (responseFeedbackAudioSource != null)
+            return;
+
+        foreach (AudioSource source in GetComponents<AudioSource>())
+        {
+            if (source != phoneAudioSource)
+            {
+                responseFeedbackAudioSource = source;
+                break;
+            }
+        }
+
+        if (responseFeedbackAudioSource == null)
+            responseFeedbackAudioSource = gameObject.AddComponent<AudioSource>();
+
+        responseFeedbackAudioSource.playOnAwake = false;
+        responseFeedbackAudioSource.loop = false;
+    }
+
+    void PlayPositiveResponseFeedbackSound()
+    {
+        if (positiveResponseClip == null)
+            return;
+
+        GarantirAudioSourceResposta();
+        if (responseFeedbackAudioSource != null)
+            responseFeedbackAudioSource.PlayOneShot(positiveResponseClip, responseFeedbackVolume);
+    }
+
+    void PlayNegativeResponseFeedbackSound()
+    {
+        if (negativeResponseClip == null)
+            return;
+
+        GarantirAudioSourceResposta();
+        if (responseFeedbackAudioSource != null)
+            responseFeedbackAudioSource.PlayOneShot(negativeResponseClip, responseFeedbackVolume);
     }
 }
