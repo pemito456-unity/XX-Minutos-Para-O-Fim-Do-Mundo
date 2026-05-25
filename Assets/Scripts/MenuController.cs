@@ -22,10 +22,9 @@ public class MenuController : MonoBehaviour
     [SerializeField] private AudioSource musicAudioSource;
     [SerializeField] private AudioClip backgroundMusicClip;
     [SerializeField] [Range(0f, 1f)] private float backgroundMusicVolume = 0.5f;
-    [SerializeField] private AudioSource responseFeedbackAudioSource;
-    [SerializeField] private AudioClip positiveResponseClip;
-    [SerializeField] private AudioClip negativeResponseClip;
-    [SerializeField] [Range(0f, 1f)] private float responseFeedbackVolume = 1f;
+    [SerializeField] private AudioSource buttonClickAudioSource;
+    [SerializeField] private AudioClip buttonClickClip;
+    [SerializeField] [Range(0f, 1f)] private float buttonClickVolume = 1f;
 
     void Start()
     {
@@ -61,29 +60,23 @@ public class MenuController : MonoBehaviour
 
     void ConfigurarBotoes()
     {
-        if (botaoCreditos != null)
-        {
-            botaoCreditos.onClick.RemoveAllListeners();
-            botaoCreditos.onClick.AddListener(MostrarPainelCreditos);
-        }
+        ConfigurarBotao(botaoCreditos, MostrarPainelCreditos);
+        ConfigurarBotao(botaoVoltarCreditos, MostrarPainelPrincipal);
+        ConfigurarBotao(botaoJogar, MostrarPainelJogar);
+        ConfigurarBotao(botaoSair, SairDoJogo);
+    }
 
-        if (botaoVoltarCreditos != null)
-        {
-            botaoVoltarCreditos.onClick.RemoveAllListeners();
-            botaoVoltarCreditos.onClick.AddListener(MostrarPainelPrincipal);
-        }
+    void ConfigurarBotao(Button botao, UnityEngine.Events.UnityAction acao)
+    {
+        if (botao == null || acao == null)
+            return;
 
-        if (botaoJogar != null)
+        botao.onClick.RemoveAllListeners();
+        botao.onClick.AddListener(() =>
         {
-            botaoJogar.onClick.RemoveAllListeners();
-            botaoJogar.onClick.AddListener(MostrarPainelJogar);
-        }
-
-        if (botaoSair != null)
-        {
-            botaoSair.onClick.RemoveAllListeners();
-            botaoSair.onClick.AddListener(SairDoJogo);
-        }
+            PlayButtonClickSound();
+            acao();
+        });
     }
 
     void Update()
@@ -132,22 +125,22 @@ public class MenuController : MonoBehaviour
             musicAudioSource.loop = true;
         }
 
-        if (responseFeedbackAudioSource == null)
+        if (buttonClickAudioSource == null)
         {
             foreach (AudioSource source in GetComponents<AudioSource>())
             {
                 if (source != musicAudioSource)
                 {
-                    responseFeedbackAudioSource = source;
+                    buttonClickAudioSource = source;
                     break;
                 }
             }
 
-            if (responseFeedbackAudioSource == null)
-                responseFeedbackAudioSource = gameObject.AddComponent<AudioSource>();
+            if (buttonClickAudioSource == null)
+                buttonClickAudioSource = gameObject.AddComponent<AudioSource>();
 
-            responseFeedbackAudioSource.playOnAwake = false;
-            responseFeedbackAudioSource.loop = false;
+            buttonClickAudioSource.playOnAwake = false;
+            buttonClickAudioSource.loop = false;
         }
     }
 
@@ -170,19 +163,11 @@ public class MenuController : MonoBehaviour
             musicAudioSource.Stop();
     }
 
-    public void PlayPositiveResponseFeedbackSound()
+    public void PlayButtonClickSound()
     {
-        if (positiveResponseClip == null || responseFeedbackAudioSource == null)
+        if (buttonClickClip == null || buttonClickAudioSource == null)
             return;
 
-        responseFeedbackAudioSource.PlayOneShot(positiveResponseClip, responseFeedbackVolume);
-    }
-
-    public void PlayNegativeResponseFeedbackSound()
-    {
-        if (negativeResponseClip == null || responseFeedbackAudioSource == null)
-            return;
-
-        responseFeedbackAudioSource.PlayOneShot(negativeResponseClip, responseFeedbackVolume);
+        buttonClickAudioSource.PlayOneShot(buttonClickClip, buttonClickVolume);
     }
 }
