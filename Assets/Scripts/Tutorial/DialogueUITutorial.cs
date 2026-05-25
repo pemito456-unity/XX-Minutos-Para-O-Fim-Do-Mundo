@@ -155,14 +155,38 @@ public class DialogueUITutorial : MonoBehaviour
     
     public void OnButtonClick(int buttonIndex)
     {
-        if (!isDialogueActive) return;
-        
+        if (!isDialogueActive || currentDialogue == null)
+            return;
+
+        if (buttonIndex < 0 || buttonIndex >= currentDialogue.choices.Count)
+            return;
+
+        DialogueChoice choice = currentDialogue.choices[buttonIndex];
         Debug.Log($"🔘 Tutorial - Botão {buttonIndex + 1} clicado!");
-        
-        if (currentDialogue != null && buttonIndex < currentDialogue.choices.Count)
-        {
-            StartCoroutine(ShowReactionAndClose(currentDialogue.choices[buttonIndex]));
-        }
+
+        if (choice.skipTutorial)
+            StartCoroutine(SkipTutorialAndClose(choice));
+        else
+            StartCoroutine(ShowReactionAndClose(choice));
+    }
+
+    IEnumerator SkipTutorialAndClose(DialogueChoice choice)
+    {
+        HideAllChoiceButtons();
+
+        if (!string.IsNullOrEmpty(choice.speakerReaction) && dialogueText != null)
+            dialogueText.text = choice.speakerReaction;
+
+        yield return new WaitForSecondsRealtime(reactionTime);
+
+        onDialogueComplete = null;
+        CloseDialogue();
+
+        TutorialController2 tutorial = Object.FindAnyObjectByType<TutorialController2>();
+        if (tutorial != null)
+            tutorial.SkipTutorial();
+        else
+            Debug.LogError("DialogueUITutorial: TutorialController2 não encontrado para pular o tutorial.");
     }
     
     IEnumerator ShowReactionAndClose(DialogueChoice choice)

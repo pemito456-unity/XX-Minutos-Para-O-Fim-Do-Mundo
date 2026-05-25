@@ -42,6 +42,7 @@ public class DialogueChoice
     [Header("Consequências")]
     public float pressureChange;  // Positivo = aumenta pressão, Negativo = diminui
     public bool advancesInvestigation; // Apenas para o cientista
+    public bool skipTutorial; // Apenas na cena de tutorial: pula para a cena principal
     
     [Header("Reação do Interlocutor")]
     [TextArea(2, 4)]

@@ -23,7 +23,19 @@ MonoBehaviour:
   - buttonText: Estou pronto, Coronel.
     pressureChange: 0
     advancesInvestigation: 0
+    skipTutorial: 0
     speakerReaction: "Excelente! Vamos come\xE7ar com os proj\xE9teis."
+    animationTrigger: 
+    reactionSound: {fileID: 0}
+    screenFlashColor: {r: 0, g: 0, b: 0, a: 0}
+    screenFlashDuration: 0
+    spawnRateModifier: 0
+    extraDefenderDamage: 0
+  - buttonText: "Pular tutorial e ir para a miss\xE3o."
+    pressureChange: 0
+    advancesInvestigation: 0
+    skipTutorial: 1
+    speakerReaction: Entendido. Boa sorte na linha de frente, General.
     animationTrigger: 
     reactionSound: {fileID: 0}
     screenFlashColor: {r: 0, g: 0, b: 0, a: 0}

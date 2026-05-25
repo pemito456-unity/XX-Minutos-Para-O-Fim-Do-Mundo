@@ -26,6 +26,7 @@ public class TutorialController2 : MonoBehaviour
     private int meteorosDestruidos;
     private List<GameObject> meteorosAtivos = new List<GameObject>();
     private bool ondaEmAndamento;
+    private Coroutine tutorialCoroutine;
 
     void Start()
     {
@@ -39,7 +40,34 @@ public class TutorialController2 : MonoBehaviour
             Debug.LogError("TutorialController2: EnemyMissileSpawner_Tutorial não encontrado na cena!");
 
         spawnerTutorial?.StopSpawning();
-        StartCoroutine(RunTutorial());
+        tutorialCoroutine = StartCoroutine(RunTutorial());
+    }
+
+    public void SkipTutorial()
+    {
+        if (tutorialCoroutine != null)
+        {
+            StopCoroutine(tutorialCoroutine);
+            tutorialCoroutine = null;
+        }
+
+        StopAllCoroutines();
+        ondaEmAndamento = false;
+        spawnerTutorial?.StopSpawning();
+
+        meteorosAtivos.RemoveAll(m => m == null);
+        foreach (GameObject meteoro in meteorosAtivos)
+        {
+            if (meteoro != null)
+                Destroy(meteoro);
+        }
+        meteorosAtivos.Clear();
+
+        if (gameController != null)
+            gameController.currentState = GameController_Def.GameState.Gameplay;
+
+        Debug.Log("Tutorial pulado — carregando cena principal.");
+        IniciarCenaPrincipal();
     }
     
     IEnumerator RunTutorial()
