@@ -10,7 +10,10 @@ public class MenuController : MonoBehaviour
 
     [Header("Painéis do Menu")]
     public GameObject painelPrincipal;
+    [Tooltip("Raiz do painel de créditos (objeto Credits na cena).")]
     public GameObject painelCreditos;
+    [Tooltip("Imagem de fundo do painel (filho PainelCreditos). Arraste sua arte aqui depois.")]
+    [SerializeField] private Image imagemPainelCreditos;
 
     [Header("Botões (opcional - encontrados por nome se vazios)")]
     public Button botaoJogar;
@@ -50,6 +53,13 @@ public class MenuController : MonoBehaviour
             botaoJogar = EncontrarBotao("ButtonPlay");
         if (botaoSair == null)
             botaoSair = EncontrarBotao("ButtonExit");
+
+        if (imagemPainelCreditos == null && painelCreditos != null)
+        {
+            Transform painel = painelCreditos.transform.Find("PainelCreditos");
+            if (painel != null)
+                imagemPainelCreditos = painel.GetComponent<Image>();
+        }
     }
 
     static Button EncontrarBotao(string nome)
