@@ -4841,9 +4841,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   missilePrefab: {fileID: 2151505837289263774, guid: f5153aec5bc58fb498a44164b5c32de3, type: 3}
   Ypadding: 0.5
-  excludeXMin: -8.36
-  excludeXMax: -3.83
-  safeMargin: 0.2
+  areaBounds: {fileID: 0}
   spawnY: 3
   initialSpawnDelay: 2.5
   finalSpawnDelay: 0.8
@@ -4991,7 +4989,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a95664db6574f8642b91630ead5f0526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueUITest
-  timeBetweenCalls: 30
+  timeBetweenCalls: 10
   ignoreCallPenalty: 10
   callRingingDuration: 10
   dialogueTimeout: 15
@@ -5007,10 +5005,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ad014f11bfbe9a04ab869f78628b22b1, type: 2}
   - {fileID: 11400000, guid: 36a5d19101b87fa43b30a95b61d404b9, type: 2}
   - {fileID: 11400000, guid: 4c0d89b3ef5054a41bc529dffafd0c6a, type: 2}
-  scientistDialogues:
+  scientistConversations:
   - {fileID: 11400000, guid: 693ed1f03cc056143980e3c743d23874, type: 2}
-  - {fileID: 11400000, guid: b9ed3f36025f3f74f854c3977613fa76, type: 2}
-  - {fileID: 11400000, guid: d271dbb65fbf972479411fa2df3f63f8, type: 2}
   dialoguePanel: {fileID: 890590774}
   speakerPortraitImage: {fileID: 278923966}
   speakerNameText: {fileID: 759421088}
@@ -5024,6 +5020,10 @@ MonoBehaviour:
   ChoicesContainer: {fileID: 786180284}
   phoneAudioSource: {fileID: 2140443002}
   phoneRingingClip: {fileID: 8300000, guid: f82464cfd751cfd4cbba0061bb1d2327, type: 3}
+  responseFeedbackAudioSource: {fileID: 0}
+  positiveResponseClip: {fileID: 0}
+  negativeResponseClip: {fileID: 0}
+  responseFeedbackVolume: 1
   targetCanvas: {fileID: 0}
   phoneButtonObject: {fileID: 0}
   phoneButtonPrefab: {fileID: 1457863058555510751, guid: 3ba9156ff1bcfd243846f5b32c19966f, type: 3}

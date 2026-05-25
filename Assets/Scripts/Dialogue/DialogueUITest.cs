@@ -15,7 +15,7 @@ public class DialogueUITest : MonoBehaviour
     [Header("Diálogos")]
     [SerializeField] private List<DialogueData> colonelDialogues;
     [SerializeField] private List<DialogueData> secretaryDialogues;
-    [SerializeField] private List<DialogueData> scientistDialogues;
+    [SerializeField] private List<ScientistConversationData> scientistConversations;
     
     [Header("UI")]
     [SerializeField] private GameObject dialoguePanel;
@@ -49,14 +49,27 @@ public class DialogueUITest : MonoBehaviour
     [SerializeField] private GameObject phoneButtonObject;
     [SerializeField] private GameObject phoneButtonPrefab;
     
+    private struct PendingPhoneCall
+    {
+        public DialogueData Standard;
+        public ScientistConversationData Scientist;
+
+        public bool IsScientist => Scientist != null;
+    }
+
     private GameController_Def gameController;
     private List<DialogueChoice> shuffledChoices = new List<DialogueChoice>();
-    private Queue<DialogueData> pendingDialogues = new Queue<DialogueData>();
+    private Queue<PendingPhoneCall> pendingCalls = new Queue<PendingPhoneCall>();
     private DialogueData currentDialogue;
+    private ScientistConversationData currentScientistConversation;
+    private ConversationPlayerChoice currentScientistChoice;
     private bool isDialogueActive = false;
+    private bool isScientistConversation = false;
+    private bool waitingForScientistChoice = false;
     private bool isRinging = false;
     private Coroutine ringingCoroutine;
     private Coroutine dialogueTimeoutCoroutine;
+    private Coroutine scientistConversationCoroutine;
     
     private int currentScientistIndex = 0;
     private int randomCallsSinceLastScientist = 0;
@@ -85,7 +98,7 @@ public class DialogueUITest : MonoBehaviour
         StartCoroutine(DialogueScheduler());
         
         Debug.Log($"=== DialogueUITest iniciado ===");
-        Debug.Log($"Total de diálogos do cientista: {scientistDialogues.Count}");
+        Debug.Log($"Total de conversas do cientista: {scientistConversations.Count}");
     }
     
     void SetupButtons()
@@ -117,6 +130,13 @@ public class DialogueUITest : MonoBehaviour
         {
             StopCoroutine(dialogueTimeoutCoroutine);
             dialogueTimeoutCoroutine = null;
+        }
+
+        if (isScientistConversation)
+        {
+            if (buttonIndex == 0 && waitingForScientistChoice && currentScientistChoice != null)
+                OnScientistChoiceSelected(currentScientistChoice);
+            return;
         }
         
         Debug.Log($" Botão {buttonIndex + 1} clicado! ================");
@@ -181,6 +201,20 @@ public class DialogueUITest : MonoBehaviour
         }
 
         Debug.Log($"✅ {choiceCount} botões configurados (ordem aleatória)");
+    }
+
+    void ShowSingleChoiceButton(ConversationPlayerChoice choice)
+    {
+        HideAllChoiceButtons();
+
+        if (choice == null || choiceButton1 == null)
+            return;
+
+        choiceButton1.gameObject.SetActive(true);
+        if (choiceText1 != null)
+            choiceText1.text = choice.buttonText;
+
+        DialogueButtonStyling.ApplyChoiceButtonHover(choiceButton1);
     }
 
     static List<DialogueChoice> EmbaralharLista(List<DialogueChoice> original)
@@ -261,7 +295,7 @@ public class DialogueUITest : MonoBehaviour
                 gameController.currentState == GameController_Def.GameState.Gameplay && 
                 !isDialogueActive && 
                 !isRinging &&
-                pendingDialogues.Count == 0)
+                pendingCalls.Count == 0)
             {
                 Debug.Log($"Scheduler: Nova chamada após {timeBetweenCalls}s");
                 ScheduleNextDialogue();
@@ -271,53 +305,57 @@ public class DialogueUITest : MonoBehaviour
     
     void ScheduleNextDialogue()
     {
-        DialogueData nextDialogue = GetNextDialogue();
+        PendingPhoneCall nextCall = GetNextPhoneCall();
         
-        if (nextDialogue != null)
+        if (nextCall.IsScientist || nextCall.Standard != null)
         {
-            pendingDialogues.Enqueue(nextDialogue);
-            Debug.Log($"Novo diálogo na fila: {nextDialogue.speakerName} (Tipo: {nextDialogue.speakerType})");
+            pendingCalls.Enqueue(nextCall);
+            string nome = nextCall.IsScientist
+                ? nextCall.Scientist.speakerName
+                : nextCall.Standard.speakerName;
+            Debug.Log($"Nova chamada na fila: {nome}");
             StartRinging();
         }
         else
         {
-            Debug.LogError("GetNextDialogue retornou NULL!");
+            Debug.LogError("GetNextPhoneCall retornou chamada vazia!");
         }
     }
     
-    DialogueData GetNextDialogue()
+    PendingPhoneCall GetNextPhoneCall()
     {
-        if (currentScientistIndex < scientistDialogues.Count)
+        if (currentScientistIndex < scientistConversations.Count)
         {
             if (randomCallsSinceLastScientist >= RANDOM_BETWEEN_SCIENTISTS)
             {
-                DialogueData scientist = scientistDialogues[currentScientistIndex];
+                ScientistConversationData scientist = scientistConversations[currentScientistIndex];
                 currentScientistIndex++;
                 randomCallsSinceLastScientist = 0;
-                Debug.Log($"🔬 CIENTISTA {currentScientistIndex}/{scientistDialogues.Count}");
-                return scientist;
+                Debug.Log($"🔬 CIENTISTA {currentScientistIndex}/{scientistConversations.Count}");
+                return new PendingPhoneCall { Scientist = scientist };
             }
-            else
+
+            DialogueData random = GetRandomNonScientistDialogue();
+            if (random != null)
             {
-                DialogueData random = GetRandomNonScientistDialogue();
-                if (random != null)
-                {
-                    randomCallsSinceLastScientist++;
-                    Debug.Log($"ALEATÓRIO {randomCallsSinceLastScientist}/{RANDOM_BETWEEN_SCIENTISTS}");
-                    return random;
-                }
+                randomCallsSinceLastScientist++;
+                Debug.Log($"ALEATÓRIO {randomCallsSinceLastScientist}/{RANDOM_BETWEEN_SCIENTISTS}");
+                return new PendingPhoneCall { Standard = random };
             }
         }
         
-        if (currentScientistIndex >= scientistDialogues.Count && scientistDialogues.Count > 0)
+        if (currentScientistIndex >= scientistConversations.Count && scientistConversations.Count > 0)
         {
             Debug.Log("VITÓRIA!");
             if (gameController != null)
                 gameController.TriggerVictory();
-            return null;
+            return default;
         }
         
-        return GetRandomNonScientistDialogue();
+        DialogueData fallback = GetRandomNonScientistDialogue();
+        return fallback != null
+            ? new PendingPhoneCall { Standard = fallback }
+            : default;
     }
     
     DialogueData GetRandomNonScientistDialogue()
@@ -333,7 +371,7 @@ public class DialogueUITest : MonoBehaviour
     
     void StartRinging()
     {
-        if (pendingDialogues.Count == 0) return;
+        if (pendingCalls.Count == 0) return;
         
         if (isRinging)
         {
@@ -369,9 +407,9 @@ public class DialogueUITest : MonoBehaviour
             yield return null;
         }
         
-        if (isRinging && pendingDialogues.Count > 0)
+        if (isRinging && pendingCalls.Count > 0)
         {
-            DialogueData ignoredDialogue = pendingDialogues.Dequeue();
+            PendingPhoneCall ignoredCall = pendingCalls.Dequeue();
             Debug.Log($"Chamada ignorada! Penalidade: +{ignoreCallPenalty} pressão");
             
             if (gameController != null)
@@ -404,7 +442,7 @@ public class DialogueUITest : MonoBehaviour
     
     public void AnswerPhone()
     {
-        if (!isDialogueActive && pendingDialogues.Count > 0)
+        if (!isDialogueActive && pendingCalls.Count > 0)
         {
             isRinging = false;
 
@@ -423,8 +461,14 @@ public class DialogueUITest : MonoBehaviour
                 phoneAudioSource.loop = false;
             }
 
-            currentDialogue = pendingDialogues.Dequeue();
-            StartDialogue();
+            PendingPhoneCall call = pendingCalls.Dequeue();
+            if (call.IsScientist)
+                StartScientistConversation(call.Scientist);
+            else
+            {
+                currentDialogue = call.Standard;
+                StartDialogue();
+            }
         }
     }
     
@@ -438,6 +482,7 @@ public class DialogueUITest : MonoBehaviour
         
         Debug.Log($"Iniciando diálogo: {currentDialogue.speakerName}");
         
+        isScientistConversation = false;
         isDialogueActive = true;
 
         if (dialoguePanel != null)
@@ -471,6 +516,152 @@ public class DialogueUITest : MonoBehaviour
         dialogueTimeoutCoroutine = StartCoroutine(DialogueTimeoutCoroutine());
         
         Debug.Log($"Diálogo exibido! ({currentDialogue.choices.Count} opções) - Áudio do telefone continua tocando");
+    }
+
+    void StartScientistConversation(ScientistConversationData conversation)
+    {
+        if (conversation == null || conversation.exchanges == null || conversation.exchanges.Count == 0)
+        {
+            Debug.LogError("Conversa do cientista inválida ou sem trocas de fala!");
+            return;
+        }
+
+        currentScientistConversation = conversation;
+        currentDialogue = null;
+        isScientistConversation = true;
+        isDialogueActive = true;
+
+        if (dialoguePanel != null)
+            dialoguePanel.SetActive(true);
+
+        if (speakerPortraitImage != null)
+        {
+            if (conversation.speakerPortrait != null)
+            {
+                speakerPortraitImage.sprite = conversation.speakerPortrait;
+                speakerPortraitImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                speakerPortraitImage.gameObject.SetActive(false);
+            }
+        }
+
+        if (scientistConversationCoroutine != null)
+            StopCoroutine(scientistConversationCoroutine);
+
+        scientistConversationCoroutine = StartCoroutine(RunScientistConversationCoroutine());
+        Debug.Log($"Conversa do cientista iniciada ({conversation.exchanges.Count} trocas)");
+    }
+
+    IEnumerator RunScientistConversationCoroutine()
+    {
+        List<ConversationExchange> exchanges = currentScientistConversation.exchanges;
+
+        for (int i = 0; i < exchanges.Count; i++)
+        {
+            ConversationExchange exchange = exchanges[i];
+            if (exchange == null)
+                continue;
+
+            if (speakerNameText != null)
+                speakerNameText.text = currentScientistConversation.speakerName;
+
+            if (dialogueText != null)
+                dialogueText.text = exchange.scientistLine;
+
+            HideAllChoiceButtons();
+            yield return new WaitForSecondsRealtime(0.35f);
+
+            ConversationPlayerChoice playerChoice = exchange.playerResponse;
+            if (playerChoice == null || string.IsNullOrWhiteSpace(playerChoice.buttonText))
+            {
+                Debug.LogWarning($"Troca {i + 1} sem resposta do jogador; pulando botão.");
+                continue;
+            }
+
+            waitingForScientistChoice = true;
+            currentScientistChoice = playerChoice;
+            ShowSingleChoiceButton(playerChoice);
+            StartScientistResponseTimeout();
+
+            while (waitingForScientistChoice)
+                yield return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(currentScientistConversation.closingScientistLine))
+        {
+            if (speakerNameText != null)
+                speakerNameText.text = currentScientistConversation.speakerName;
+
+            if (dialogueText != null)
+                dialogueText.text = currentScientistConversation.closingScientistLine;
+
+            HideAllChoiceButtons();
+            yield return new WaitForSecondsRealtime(2f);
+        }
+
+        if (currentScientistConversation.advancesInvestigationOnComplete && gameController != null)
+            gameController.AdvanceInvestigation();
+
+        EndDialogue();
+    }
+
+    void StartScientistResponseTimeout()
+    {
+        if (dialogueTimeoutCoroutine != null)
+            StopCoroutine(dialogueTimeoutCoroutine);
+
+        float timeout = currentScientistConversation != null
+            ? currentScientistConversation.timeToDecidePerResponse
+            : dialogueTimeout;
+
+        dialogueTimeoutCoroutine = StartCoroutine(ScientistResponseTimeoutCoroutine(timeout));
+    }
+
+    IEnumerator ScientistResponseTimeoutCoroutine(float timeout)
+    {
+        float elapsed = 0f;
+
+        while (elapsed < timeout)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (!isScientistConversation || !waitingForScientistChoice)
+            yield break;
+
+        Debug.Log($"⏰ Sem resposta em {timeout}s na conversa do cientista. Penalidade: +{ignoreCallPenalty} pressão");
+
+        if (gameController != null)
+            gameController.ModifyPressureByDialogue(ignoreCallPenalty);
+
+        waitingForScientistChoice = false;
+        EndDialogue();
+    }
+
+    void OnScientistChoiceSelected(ConversationPlayerChoice choice)
+    {
+        waitingForScientistChoice = false;
+        currentScientistChoice = null;
+
+        if (dialogueTimeoutCoroutine != null)
+        {
+            StopCoroutine(dialogueTimeoutCoroutine);
+            dialogueTimeoutCoroutine = null;
+        }
+
+        Debug.Log($"Resposta (cientista): {choice.buttonText} | Pressão: {(choice.pressureChange >= 0 ? "+" : "")}{choice.pressureChange}");
+
+        if (gameController != null)
+        {
+            gameController.ModifyPressureByDialogue(choice.pressureChange);
+            if (choice.advancesInvestigation)
+                gameController.AdvanceInvestigation();
+        }
+
+        PlayChoicePressureFlash(choice.pressureChange);
     }
     
     IEnumerator DialogueTimeoutCoroutine()
@@ -548,6 +739,15 @@ public class DialogueUITest : MonoBehaviour
         Debug.Log("Fechando diálogo");
         
         isDialogueActive = false;
+        isScientistConversation = false;
+        waitingForScientistChoice = false;
+        currentScientistChoice = null;
+
+        if (scientistConversationCoroutine != null)
+        {
+            StopCoroutine(scientistConversationCoroutine);
+            scientistConversationCoroutine = null;
+        }
         
         if (dialogueTimeoutCoroutine != null)
         {
@@ -559,6 +759,7 @@ public class DialogueUITest : MonoBehaviour
             dialoguePanel.SetActive(false);
         
         currentDialogue = null;
+        currentScientistConversation = null;
         
         HideAllChoiceButtons();
         shuffledChoices.Clear();
@@ -590,10 +791,9 @@ public class DialogueUITest : MonoBehaviour
             currentDialogue = colonelDialogues[0];
             StartDialogue();
         }
-        else if (scientistDialogues.Count > 0)
+        else if (scientistConversations.Count > 0)
         {
-            currentDialogue = scientistDialogues[0];
-            StartDialogue();
+            StartScientistConversation(scientistConversations[0]);
         }
         else
         {
@@ -605,7 +805,7 @@ public class DialogueUITest : MonoBehaviour
     {
         currentScientistIndex = 0;
         randomCallsSinceLastScientist = 0;
-        pendingDialogues.Clear();
+        pendingCalls.Clear();
         
         if (phoneAudioSource != null && phoneAudioSource.isPlaying)
         {

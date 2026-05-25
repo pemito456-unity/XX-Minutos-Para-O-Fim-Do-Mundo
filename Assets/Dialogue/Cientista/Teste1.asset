@@ -9,41 +9,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cb3f5ff6b5fadc448a6545d333ba265, type: 3}
+  m_Script: {fileID: 11500000, guid: 8f3c2a1b9e4d5647a8b9c0d1e2f3a4b5, type: 3}
   m_Name: Teste1
-  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  m_EditorClassIdentifier: Assembly-CSharp::ScientistConversationData
   speakerName: Cientista
-  speakerType: 2
   speakerPortrait: {fileID: -3115044460567940278, guid: 10e559fa91a58d34b8ecc16d6b2896cc, type: 3}
-  dialogueText: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-  isMandatory: 1
-  timeToDecide: 15
-  choices:
-  - buttonText: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua.
-    pressureChange: 10
-    advancesInvestigation: 0
-    speakerReaction: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-      do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-    animationTrigger: 
-    reactionSound: {fileID: 0}
-    screenFlashColor: {r: 0, g: 0, b: 0, a: 0}
-    screenFlashDuration: 0
-    spawnRateModifier: 0
-    extraDefenderDamage: 0
-  - buttonText: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua
-    pressureChange: -10
-    advancesInvestigation: 0
-    speakerReaction: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-      do eiusmod tempor incididunt ut labore et dolore magna aliqua
-    animationTrigger: 
-    reactionSound: {fileID: 0}
-    screenFlashColor: {r: 0, g: 0, b: 0, a: 0}
-    screenFlashDuration: 0
-    spawnRateModifier: 0
-    extraDefenderDamage: 0
+  timeToDecidePerResponse: 15
+  advancesInvestigationOnComplete: 1
+  exchanges:
+  - scientistLine: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+      eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+      consequat.
+    playerResponse:
+      buttonText: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+        eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      pressureChange: 0
+      advancesInvestigation: 1
+  - scientistLine: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+      eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    playerResponse:
+      buttonText: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+        eiusmod tempor incididunt ut labore et dolore magna aliqua
+      pressureChange: 0
+      advancesInvestigation: 0
+  closingScientistLine: 
   dialogueStartClip: {fileID: 0}
-  speakerVoiceClip: {fileID: 0}
