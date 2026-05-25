@@ -11,6 +11,8 @@ public class DialogueUITest : MonoBehaviour
     [SerializeField] private float ignoreCallPenalty = 15f;
     [SerializeField] private float callRingingDuration = 10f;
     [SerializeField] private float dialogueTimeout = 20f;
+    [Tooltip("Quantas chamadas normais antes de um diálogo adiado com E voltar a tocar.")]
+    [SerializeField] private int normalCallsBeforePostponed = 1;
     
     [Header("Diálogos")]
     [SerializeField] private List<DialogueData> colonelDialogues;
@@ -61,6 +63,10 @@ public class DialogueUITest : MonoBehaviour
     private List<DialogueChoice> shuffledChoices = new List<DialogueChoice>();
     private bool hasIncomingCall;
     private PendingPhoneCall incomingCall;
+    private bool hasActiveDialogueCall;
+    private PendingPhoneCall activeDialogueCall;
+    private readonly Queue<PendingPhoneCall> postponedCalls = new Queue<PendingPhoneCall>();
+    private int normalCallsSincePostpone;
     private DialogueData currentDialogue;
     private ScientistConversationData currentScientistConversation;
     private ConversationPlayerChoice currentScientistChoice;
@@ -149,13 +155,13 @@ public class DialogueUITest : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
-        {
             TestForceCall();
-        }
+
         if (Input.GetKeyDown(KeyCode.R))
-        {
             TestForceDialogue();
-        }
+
+        if (Input.GetKeyDown(KeyCode.E) && isDialogueActive)
+            SkipActiveDialogue();
     }
     
     void HideAllChoiceButtons()
@@ -312,7 +318,7 @@ public class DialogueUITest : MonoBehaviour
             return;
         }
 
-        PendingPhoneCall nextCall = GetNextPhoneCall();
+        PendingPhoneCall nextCall = GetNextScheduledPhoneCall();
         
         if (nextCall.IsScientist || nextCall.Standard != null)
         {
@@ -330,7 +336,21 @@ public class DialogueUITest : MonoBehaviour
         }
     }
     
-    PendingPhoneCall GetNextPhoneCall()
+    PendingPhoneCall GetNextScheduledPhoneCall()
+    {
+        if (postponedCalls.Count > 0 && normalCallsSincePostpone >= Mathf.Max(1, normalCallsBeforePostponed))
+        {
+            normalCallsSincePostpone = 0;
+            PendingPhoneCall postponed = postponedCalls.Dequeue();
+            Debug.Log($"Chamada adiada (E) reordenada — voltando: {GetCallDisplayName(postponed)}");
+            return postponed;
+        }
+
+        normalCallsSincePostpone++;
+        return PickNextPhoneCall();
+    }
+
+    PendingPhoneCall PickNextPhoneCall()
     {
         if (currentScientistIndex < scientistConversations.Count)
         {
@@ -505,6 +525,13 @@ public class DialogueUITest : MonoBehaviour
         PendingPhoneCall call = incomingCall;
         ClearIncomingCall();
         EndRingingState(stopTimerCoroutine: true);
+        BeginPhoneCall(call);
+    }
+
+    void BeginPhoneCall(PendingPhoneCall call)
+    {
+        activeDialogueCall = call;
+        hasActiveDialogueCall = true;
 
         if (call.IsScientist)
             StartScientistConversation(call.Scientist);
@@ -513,6 +540,33 @@ public class DialogueUITest : MonoBehaviour
             currentDialogue = call.Standard;
             StartDialogue();
         }
+    }
+
+    void SkipActiveDialogue()
+    {
+        if (!isDialogueActive || !hasActiveDialogueCall)
+            return;
+
+        PendingPhoneCall skipped = activeDialogueCall;
+        postponedCalls.Enqueue(skipped);
+        hasActiveDialogueCall = false;
+        activeDialogueCall = default;
+        normalCallsSincePostpone = 0;
+
+        Debug.Log($"Diálogo pulado (E). Reordenado para depois: {GetCallDisplayName(skipped)}");
+
+        EndDialogue();
+
+        if (gameController != null)
+            gameController.currentState = GameController_Def.GameState.Gameplay;
+    }
+
+    static string GetCallDisplayName(PendingPhoneCall call)
+    {
+        if (call.IsScientist)
+            return call.Scientist != null ? call.Scientist.speakerName : "Cientista";
+
+        return call.Standard != null ? call.Standard.speakerName : "Desconhecido";
     }
 
     void CompleteScientistConversation()
@@ -789,6 +843,8 @@ public class DialogueUITest : MonoBehaviour
     {
         Debug.Log("Fechando diálogo");
         
+        hasActiveDialogueCall = false;
+        activeDialogueCall = default;
         isDialogueActive = false;
         isScientistConversation = false;
         waitingForScientistChoice = false;
@@ -856,6 +912,10 @@ public class DialogueUITest : MonoBehaviour
     {
         currentScientistIndex = 0;
         randomCallsSinceLastScientist = 0;
+        normalCallsSincePostpone = 0;
+        postponedCalls.Clear();
+        hasActiveDialogueCall = false;
+        activeDialogueCall = default;
         ClearIncomingCall();
         
         if (phoneAudioSource != null && phoneAudioSource.isPlaying)
