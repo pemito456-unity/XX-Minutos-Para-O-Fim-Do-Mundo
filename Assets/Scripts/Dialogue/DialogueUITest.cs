@@ -59,7 +59,8 @@ public class DialogueUITest : MonoBehaviour
 
     private GameController_Def gameController;
     private List<DialogueChoice> shuffledChoices = new List<DialogueChoice>();
-    private Queue<PendingPhoneCall> pendingCalls = new Queue<PendingPhoneCall>();
+    private bool hasIncomingCall;
+    private PendingPhoneCall incomingCall;
     private DialogueData currentDialogue;
     private ScientistConversationData currentScientistConversation;
     private ConversationPlayerChoice currentScientistChoice;
@@ -295,7 +296,7 @@ public class DialogueUITest : MonoBehaviour
                 gameController.currentState == GameController_Def.GameState.Gameplay && 
                 !isDialogueActive && 
                 !isRinging &&
-                pendingCalls.Count == 0)
+                !hasIncomingCall)
             {
                 Debug.Log($"Scheduler: Nova chamada após {timeBetweenCalls}s");
                 ScheduleNextDialogue();
@@ -305,15 +306,22 @@ public class DialogueUITest : MonoBehaviour
     
     void ScheduleNextDialogue()
     {
+        if (hasIncomingCall || isRinging)
+        {
+            Debug.LogWarning("Já existe uma chamada ativa; nova chamada não foi agendada.");
+            return;
+        }
+
         PendingPhoneCall nextCall = GetNextPhoneCall();
         
         if (nextCall.IsScientist || nextCall.Standard != null)
         {
-            pendingCalls.Enqueue(nextCall);
+            incomingCall = nextCall;
+            hasIncomingCall = true;
             string nome = nextCall.IsScientist
                 ? nextCall.Scientist.speakerName
                 : nextCall.Standard.speakerName;
-            Debug.Log($"Nova chamada na fila: {nome}");
+            Debug.Log($"Nova chamada recebida: {nome}");
             StartRinging();
         }
         else
@@ -329,9 +337,8 @@ public class DialogueUITest : MonoBehaviour
             if (randomCallsSinceLastScientist >= RANDOM_BETWEEN_SCIENTISTS)
             {
                 ScientistConversationData scientist = scientistConversations[currentScientistIndex];
-                currentScientistIndex++;
                 randomCallsSinceLastScientist = 0;
-                Debug.Log($"🔬 CIENTISTA {currentScientistIndex}/{scientistConversations.Count}");
+                Debug.Log($"🔬 Chamada do cientista ({currentScientistIndex + 1}/{scientistConversations.Count})");
                 return new PendingPhoneCall { Scientist = scientist };
             }
 
@@ -371,7 +378,8 @@ public class DialogueUITest : MonoBehaviour
     
     void StartRinging()
     {
-        if (pendingCalls.Count == 0) return;
+        if (!hasIncomingCall)
+            return;
         
         if (isRinging)
         {
@@ -393,7 +401,9 @@ public class DialogueUITest : MonoBehaviour
         if (phoneButtonObject != null)
             phoneButtonObject.SetActive(true);
 
-        if (ringingCoroutine != null) StopCoroutine(ringingCoroutine);
+        if (ringingCoroutine != null)
+            StopCoroutine(ringingCoroutine);
+
         ringingCoroutine = StartCoroutine(RingingTimerCoroutine());
     }
     
@@ -401,75 +411,115 @@ public class DialogueUITest : MonoBehaviour
     {
         float elapsed = 0f;
         
-        while (elapsed < callRingingDuration && isRinging)
+        while (elapsed < callRingingDuration)
         {
+            if (!isRinging)
+            {
+                ringingCoroutine = null;
+                yield break;
+            }
+
             elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
         
-        if (isRinging && pendingCalls.Count > 0)
-        {
-            PendingPhoneCall ignoredCall = pendingCalls.Dequeue();
-            Debug.Log($"Chamada ignorada! Penalidade: +{ignoreCallPenalty} pressão");
-            
-            if (gameController != null)
-                gameController.ModifyPressureByDialogue(ignoreCallPenalty);
-            
-            if (phoneAudioSource != null && phoneAudioSource.isPlaying)
-            {
-                phoneAudioSource.Stop();
-                phoneAudioSource.loop = false;
-            }
-            
-            StopRinging();
-        }
+        if (isRinging && hasIncomingCall)
+            HandleCallIgnored();
+
+        ringingCoroutine = null;
     }
-    
-    void StopRinging()
+
+    void HandleCallIgnored()
+    {
+        if (!hasIncomingCall)
+            return;
+
+        string callerName = incomingCall.IsScientist
+            ? incomingCall.Scientist.speakerName
+            : incomingCall.Standard.speakerName;
+
+        Debug.Log($"Chamada ignorada ({callerName})! Penalidade: +{ignoreCallPenalty} pressão política");
+
+        ClearIncomingCall();
+        ApplyIgnoredCallPenalty();
+        EndRingingState(stopTimerCoroutine: false);
+    }
+
+    void ApplyIgnoredCallPenalty()
+    {
+        if (gameController == null)
+            gameController = Object.FindAnyObjectByType<GameController_Def>();
+
+        if (gameController == null)
+        {
+            Debug.LogWarning("GameController não encontrado — penalidade de chamada ignorada não aplicada.");
+            return;
+        }
+
+        gameController.AddYellowPressure(ignoreCallPenalty, playFeedback: false);
+        TriggerScreenFlash(new Color(1f, 0.12f, 0.08f, 1f), 0.35f);
+        PlayNegativeResponseFeedbackSound();
+    }
+
+    void ClearIncomingCall()
+    {
+        hasIncomingCall = false;
+        incomingCall = default;
+    }
+
+    void EndRingingState(bool stopTimerCoroutine)
     {
         isRinging = false;
 
         if (phoneButtonObject != null)
             phoneButtonObject.SetActive(false);
 
-        if (ringingCoroutine != null)
+        StopPhoneRingingAudio();
+
+        if (stopTimerCoroutine && ringingCoroutine != null)
         {
             StopCoroutine(ringingCoroutine);
             ringingCoroutine = null;
         }
+    }
 
+    void StopPhoneRingingAudio()
+    {
+        if (phoneAudioSource != null && phoneAudioSource.isPlaying)
+        {
+            phoneAudioSource.Stop();
+            phoneAudioSource.loop = false;
+        }
+    }
+    
+    void StopRinging()
+    {
+        EndRingingState(stopTimerCoroutine: true);
     }
     
     public void AnswerPhone()
     {
-        if (!isDialogueActive && pendingCalls.Count > 0)
+        if (isDialogueActive || !hasIncomingCall)
+            return;
+
+        PendingPhoneCall call = incomingCall;
+        ClearIncomingCall();
+        EndRingingState(stopTimerCoroutine: true);
+
+        if (call.IsScientist)
+            StartScientistConversation(call.Scientist);
+        else
         {
-            isRinging = false;
-
-            if (phoneButtonObject != null)
-                phoneButtonObject.SetActive(false);
-
-            if (ringingCoroutine != null)
-            {
-                StopCoroutine(ringingCoroutine);
-                ringingCoroutine = null;
-            }
-
-            if (phoneAudioSource != null && phoneAudioSource.isPlaying)
-            {
-                phoneAudioSource.Stop();
-                phoneAudioSource.loop = false;
-            }
-
-            PendingPhoneCall call = pendingCalls.Dequeue();
-            if (call.IsScientist)
-                StartScientistConversation(call.Scientist);
-            else
-            {
-                currentDialogue = call.Standard;
-                StartDialogue();
-            }
+            currentDialogue = call.Standard;
+            StartDialogue();
         }
+    }
+
+    void CompleteScientistConversation()
+    {
+        currentScientistIndex++;
+        randomCallsSinceLastScientist = 0;
+        Debug.Log($"Conversa do cientista concluída. Progresso: {currentScientistIndex}/{scientistConversations.Count}");
     }
     
     void StartDialogue()
@@ -604,6 +654,7 @@ public class DialogueUITest : MonoBehaviour
         if (currentScientistConversation.advancesInvestigationOnComplete && gameController != null)
             gameController.AdvanceInvestigation();
 
+        CompleteScientistConversation();
         EndDialogue();
     }
 
@@ -776,7 +827,7 @@ public class DialogueUITest : MonoBehaviour
     {
         Debug.Log("=== TESTE: Forçando chamada ===");
         
-        if (!isRinging && !isDialogueActive)
+        if (!isRinging && !isDialogueActive && !hasIncomingCall)
         {
             ScheduleNextDialogue();
         }
@@ -805,7 +856,7 @@ public class DialogueUITest : MonoBehaviour
     {
         currentScientistIndex = 0;
         randomCallsSinceLastScientist = 0;
-        pendingCalls.Clear();
+        ClearIncomingCall();
         
         if (phoneAudioSource != null && phoneAudioSource.isPlaying)
         {

@@ -4843,7 +4843,7 @@ MonoBehaviour:
   Ypadding: 0.5
   areaBounds: {fileID: 0}
   spawnY: 3
-  initialSpawnDelay: 2.5
+  initialSpawnDelay: 2.3
   finalSpawnDelay: 0.8
   difficultyCurve:
     serializedVersion: 2
@@ -4989,7 +4989,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a95664db6574f8642b91630ead5f0526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueUITest
-  timeBetweenCalls: 10
+  timeBetweenCalls: 30
   ignoreCallPenalty: 10
   callRingingDuration: 10
   dialogueTimeout: 15
