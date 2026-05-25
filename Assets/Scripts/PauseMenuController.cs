@@ -124,7 +124,7 @@ public class PauseMenuController : MonoBehaviour
             pausePanel.SetActive(true);
 
         if (pauseMenuContent != null)
-            pauseMenuContent.SetActive(false);
+            pauseMenuContent.SetActive(true);
 
         if (termsPanel != null)
             termsPanel.SetActive(true);
