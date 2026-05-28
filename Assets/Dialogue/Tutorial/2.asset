@@ -15,8 +15,8 @@ MonoBehaviour:
   speakerName: "Secret\xE1rio"
   speakerType: 1
   speakerPortrait: {fileID: -5632654425947497670, guid: f2bb9abbeaa35474492c503b7694108d, type: 3}
-  dialogueText: "Agora entenda a press\xE3o. A barra VERMELHA mostra a destrui\xE7\xE3o
-    da cidade. A barra AMARELA mostra press\xE3o pol\xEDtica."
+  dialogueText: "Agora entenda a press\xE3o. O medidor VERMELHO mostra a destrui\xE7\xE3o
+    da cidade. O medidor AMARELO mostra press\xE3o pol\xEDtica."
   isMandatory: 0
   timeToDecide: 15
   choices:
