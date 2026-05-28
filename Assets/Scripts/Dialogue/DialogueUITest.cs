@@ -19,6 +19,9 @@ public class DialogueUITest : MonoBehaviour
     [SerializeField] private List<DialogueData> secretaryDialogues;
     [SerializeField] private List<ScientistConversationData> scientistConversations;
     
+    [Header("Primeiro Diálogo (Obrigatório)")]
+    [SerializeField] private DialogueData primeiroDialogo; // 🔴 ARRASTE O "Primeiro_secretário" AQUI
+    
     [Header("UI")]
     [SerializeField] private GameObject dialoguePanel;
     [SerializeField] private Image speakerPortraitImage;
@@ -82,6 +85,8 @@ public class DialogueUITest : MonoBehaviour
     private int randomCallsSinceLastScientist = 0;
     private const int RANDOM_BETWEEN_SCIENTISTS = 2;
     
+    private bool primeiroDialogoRealizado = false; // 🔴 CONTROLE DO PRIMEIRO DIÁLOGO
+    
     private GameObject flashObject;
     private Image flashImage;
     
@@ -106,6 +111,15 @@ public class DialogueUITest : MonoBehaviour
         
         Debug.Log($"=== DialogueUITest iniciado ===");
         Debug.Log($"Total de conversas do cientista: {scientistConversations.Count}");
+        
+        if (primeiroDialogo != null)
+        {
+            Debug.Log($"Primeiro diálogo configurado: {primeiroDialogo.speakerName}");
+        }
+        else
+        {
+            Debug.LogWarning("Primeiro diálogo não configurado! O jogo começará com chamadas normais.");
+        }
     }
     
     void SetupButtons()
@@ -338,6 +352,14 @@ public class DialogueUITest : MonoBehaviour
     
     PendingPhoneCall GetNextScheduledPhoneCall()
     {
+        // 🔴 VERIFICA SE O PRIMEIRO DIÁLOGO AINDA NÃO FOI REALIZADO
+        if (!primeiroDialogoRealizado && primeiroDialogo != null)
+        {
+            primeiroDialogoRealizado = true;
+            Debug.Log($"🔴 PRIMEIRO DIÁLOGO: {primeiroDialogo.speakerName}");
+            return new PendingPhoneCall { Standard = primeiroDialogo };
+        }
+        
         if (postponedCalls.Count > 0 && normalCallsSincePostpone >= Mathf.Max(1, normalCallsBeforePostponed))
         {
             normalCallsSincePostpone = 0;
@@ -476,7 +498,7 @@ public class DialogueUITest : MonoBehaviour
             return;
         }
 
-        gameController.AddYellowPressure(ignoreCallPenalty, playFeedback: false);
+        gameController.AddYellowPressure(ignoreCallPenalty);
         TriggerScreenFlash(new Color(1f, 0.12f, 0.08f, 1f), 0.35f);
         PlayNegativeResponseFeedbackSound();
     }
@@ -917,6 +939,9 @@ public class DialogueUITest : MonoBehaviour
         hasActiveDialogueCall = false;
         activeDialogueCall = default;
         ClearIncomingCall();
+        
+        // 🔴 NÃO RESETA O primeiroDialogoRealizado
+        // primeiroDialogoRealizado = false; ← Não fazer isso para não repetir o primeiro diálogo
         
         if (phoneAudioSource != null && phoneAudioSource.isPlaying)
         {

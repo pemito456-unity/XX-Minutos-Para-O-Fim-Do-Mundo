@@ -4959,6 +4959,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4c0d89b3ef5054a41bc529dffafd0c6a, type: 2}
   scientistConversations:
   - {fileID: 11400000, guid: 693ed1f03cc056143980e3c743d23874, type: 2}
+  primeiroDialogo: {fileID: 11400000, guid: d508fb766f7a4dc4baad0f7dba2a8b69, type: 2}
   dialoguePanel: {fileID: 890590774}
   speakerPortraitImage: {fileID: 278923966}
   speakerNameText: {fileID: 759421088}
