@@ -23,6 +23,7 @@ MonoBehaviour:
   - buttonText: "Entendi. Como a press\xE3o sobe?"
     pressureChange: 0
     advancesInvestigation: 0
+    skipTutorial: 0
     speakerReaction: "Respondendo mal aos di\xE1logos ou deixando proj\xE9teis destruirem
       a cidade."
     animationTrigger: 
