@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Text;
+using TMPro;
 
 public class ComputerIntro : MonoBehaviour
 {
@@ -17,28 +18,31 @@ public class ComputerIntro : MonoBehaviour
     [Header("Próxima Cena")]
     [SerializeField] private string nextSceneName = "MainGame";
     
+    [Header("Fontes")]
+    [SerializeField] private TMP_FontAsset computerFont;
+    [SerializeField] private Font alastairFont;
+    
     private AudioSource audioSource;
-    private Text computerText;
+    private TextMeshProUGUI computerText;
     private Text alastairText;
     private GameObject introPanel;
     private float nextTypingSoundAllowedTime;
     
-    // Acumuladores de texto
     private StringBuilder computerFullText = new StringBuilder();
     private StringBuilder alastairFullText = new StringBuilder();
     
-    // 🔴 CONTROLE DE SKIP
     private bool skipRequested = false;
     private Coroutine currentRoutine;
     
+    // 🔴 NOVO TEXTO DO COMPUTADOR ATUALIZADO
     private string[] computerLines = new string[]
     {
-        "ATENÇÃO. MÚLTIPLOS OBJETOS FORAM DETECTADOS EM TRAJETÓRIA BALÍSTICA.",
-        "DISTÂNCIA MÉDIA: 2515 KM AO NORTE-NOROESTE DA CAPITAL, A 2914 KM DE ALTITUDE.",
-        "VELOCIDADE MÉDIA: 18 KM/S.",
-        "INCLINAÇÃO MÉDIA DA TRAJETÓRIA EM RELAÇÃO À SUPERFÍCIE: 44 GRAUS.",
-        "TEMPO ESTIMADO ATÉ O PRIMEIRO IMPACTO: 5 MINUTOS E 19 SEGUNDOS.",
-        "OUTROS OBJETOS SEGUEM EM FORMAÇÃO. PREPARE AS BATERIAS ANTIMÍSSEIS IMEDIATAMENTE."
+        "Atenção: múltiplos objetos não identificados detectados em reentrada atmosférica.",
+        "Alvos principais: região metropolitana de Washington e arredores, área estimada de 32.720 km².",
+        "Distância atual: aproximadamente 1.680 quilômetros de altitude ao norte-noroeste da capital. Ângulo de incidência médio de 75 graus.",
+        "Velocidade: 17,9 km/s.",
+        "Tempo estimado até o primeiro impacto em Washington D.C.: 6 minutos e 12 segundos.",
+        "Prepare todas as baterias antimísseis imediatamente. Este não é um exercício."
     };
     
     private string[] alastairLines = new string[]
@@ -74,28 +78,24 @@ public class ComputerIntro : MonoBehaviour
     
     void Update()
     {
-        // 🔴 TECLA E PARA PULAR A CUTSCENE (carrega a cena diretamente)
         if (Input.GetKeyDown(KeyCode.E) && !skipRequested)
         {
             SkipIntro();
         }
     }
     
-    // 🔴 MÉTODO PARA PULAR A INTRODUÇÃO
     private void SkipIntro()
     {
         skipRequested = true;
         
         Debug.Log("🚀 Pular introdução solicitado (Tecla E)! Carregando cena principal...");
         
-        // Para a corrotina atual
         if (currentRoutine != null)
             StopCoroutine(currentRoutine);
 
         if (audioSource != null)
             audioSource.Stop();
 
-        // Carrega a próxima cena diretamente (sem fade)
         if (!string.IsNullOrEmpty(nextSceneName))
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneName);
@@ -108,7 +108,6 @@ public class ComputerIntro : MonoBehaviour
     
     void CreateUI()
     {
-        // 1. Cria o Canvas
         GameObject canvasGO = new GameObject("IntroCanvas");
         Canvas canvas = canvasGO.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -120,7 +119,6 @@ public class ComputerIntro : MonoBehaviour
         
         canvasGO.AddComponent<GraphicRaycaster>();
         
-        // 2. Cria o painel preto
         introPanel = new GameObject("IntroPanel");
         introPanel.transform.SetParent(canvasGO.transform, false);
         
@@ -133,17 +131,23 @@ public class ComputerIntro : MonoBehaviour
         Image panelImage = introPanel.AddComponent<Image>();
         panelImage.color = Color.black;
         
-        // 3. Cria o texto do computador
         GameObject computerGO = new GameObject("ComputerText");
         computerGO.transform.SetParent(introPanel.transform, false);
         
-        computerText = computerGO.AddComponent<Text>();
-        computerText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        computerText.fontSize = 34;
-        computerText.color = new Color(0, 0.8f, 0);
-        computerText.alignment = TextAnchor.UpperLeft;
-        computerText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        computerText.verticalOverflow = VerticalWrapMode.Overflow;
+        computerText = computerGO.AddComponent<TextMeshProUGUI>();
+        if (computerFont != null)
+        {
+            computerText.font = computerFont;
+            Debug.Log("Fonte VT232 aplicada ao computador!");
+        }
+        else
+        {
+            Debug.LogWarning("Fonte VT232 não atribuída! Usando fonte padrão TMP.");
+        }
+        computerText.fontSize = 38;
+        computerText.color = new Color(0, 0.9f, 0);
+        computerText.alignment = TextAlignmentOptions.TopLeft;
+        computerText.enableWordWrapping = true;
         
         RectTransform computerRect = computerGO.GetComponent<RectTransform>();
         computerRect.anchorMin = new Vector2(0, 0.5f);
@@ -151,13 +155,15 @@ public class ComputerIntro : MonoBehaviour
         computerRect.offsetMin = new Vector2(100, 0);
         computerRect.offsetMax = new Vector2(-100, -20);
         
-        // 4. Cria o texto de Alastair
         GameObject alastairGO = new GameObject("AlastairText");
         alastairGO.transform.SetParent(introPanel.transform, false);
         
         alastairText = alastairGO.AddComponent<Text>();
-        alastairText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        alastairText.fontSize = 34;
+        if (alastairFont != null)
+            alastairText.font = alastairFont;
+        else
+            alastairText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        alastairText.fontSize = 30;
         alastairText.color = Color.white;
         alastairText.alignment = TextAnchor.UpperLeft;
         alastairText.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -169,7 +175,6 @@ public class ComputerIntro : MonoBehaviour
         alastairRect.offsetMin = new Vector2(100, 50);
         alastairRect.offsetMax = new Vector2(-100, -20);
         
-        // 🔴 TEXTO "Pressione E para pular" (canto inferior direito)
         GameObject skipTextGO = new GameObject("SkipText");
         skipTextGO.transform.SetParent(introPanel.transform, false);
         
@@ -192,7 +197,6 @@ public class ComputerIntro : MonoBehaviour
     
     IEnumerator RunIntro()
     {
-        // Limpa os textos e acumuladores
         computerFullText.Clear();
         alastairFullText.Clear();
         computerText.text = "";
@@ -200,12 +204,10 @@ public class ComputerIntro : MonoBehaviour
         
         yield return new WaitForSeconds(0.5f);
         
-        // 🔴 COMPUTADOR - Acumula frases
         for (int i = 0; i < computerLines.Length; i++)
         {
             if (skipRequested) yield break;
             
-            // Adiciona quebra de linha se não for a primeira frase
             if (i > 0)
             {
                 computerFullText.Append("\n\n");
@@ -213,7 +215,7 @@ public class ComputerIntro : MonoBehaviour
             
             computerFullText.Append(computerLines[i]);
             
-            yield return StartCoroutine(TypeLine(computerText, computerFullText.ToString(), computerLines[i], playTypingSound: true));
+            yield return StartCoroutine(TypeLineTMP(computerText, computerFullText.ToString(), computerLines[i], playTypingSound: true));
             StopIntroAudio();
 
             if (!skipRequested)
@@ -225,7 +227,6 @@ public class ComputerIntro : MonoBehaviour
         StopIntroAudio();
         yield return new WaitForSeconds(0.8f);
         
-        // ALASTAIR — sem áudio
         for (int i = 0; i < alastairLines.Length; i++)
         {
             if (skipRequested) yield break;
@@ -259,15 +260,36 @@ public class ComputerIntro : MonoBehaviour
         }
     }
     
-    IEnumerator TypeLine(Text textComponent, string fullText, string newLine, bool playTypingSound)
+    IEnumerator TypeLineTMP(TextMeshProUGUI textComponent, string fullText, string newLine, bool playTypingSound)
     {
-        // Calcula o texto que já estava lá (sem a nova linha)
         string existingText = fullText.Substring(0, fullText.Length - newLine.Length);
         
-        // Digita a nova linha caractere por caractere
         for (int i = 0; i <= newLine.Length; i++)
         {
-            // 🔴 VERIFICA SE PULAR FOI SOLICITADO
+            if (skipRequested)
+            {
+                textComponent.text = fullText;
+                yield break;
+            }
+            
+            string typedPart = newLine.Substring(0, i);
+            textComponent.text = existingText + typedPart;
+            
+            if (playTypingSound && i % 2 == 0 && i > 0)
+                TryPlayTypingSound();
+
+            yield return new WaitForSeconds(typeSpeed);
+        }
+        
+        yield return new WaitForSeconds(0.2f);
+    }
+    
+    IEnumerator TypeLine(Text textComponent, string fullText, string newLine, bool playTypingSound)
+    {
+        string existingText = fullText.Substring(0, fullText.Length - newLine.Length);
+        
+        for (int i = 0; i <= newLine.Length; i++)
+        {
             if (skipRequested)
             {
                 textComponent.text = fullText;
