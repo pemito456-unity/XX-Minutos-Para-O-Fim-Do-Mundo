@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f3c2a1b9e4d5647a8b9c0d1e2f3a4b5, type: 3}
+  m_Name: Cientista_7
+  m_EditorClassIdentifier: Assembly-CSharp::ScientistConversationData
+  speakerName: Armstrong
+  speakerPortrait: {fileID: 0}
+  timeToDecidePerResponse: 15
+  advancesInvestigationOnComplete: 1
+  exchanges:
+  - scientistLine: "General Alastair, sou o doutor Armstrong respons\xE1vel pelo
+      observat\xF3rio Lick. Nossa equipe detectou um compacto grupo de corpos celestes
+      em rota de colis\xE3o com a Terra, fazem duas semanas. Nossa mensagem nunca
+      chegou at\xE9 o alto escal\xE3o do governo. "
+    playerResponse:
+      buttonText: "viajando a 18 quil\xF4metros por hora e vindo do norte?"
+      pressureChange: 0
+      advancesInvestigation: 1
+  - scientistLine: "Exatamente, senhor. Parece que o senhor j\xE1 sabia do que se
+      trata."
+    playerResponse:
+      buttonText: "Tive minhas d\xFAvidas, mas s\xF3 agora tive confirma\xE7\xE3o."
+      pressureChange: 0
+      advancesInvestigation: 1
+  closingScientistLine: 
+  dialogueStartClip: {fileID: 0}

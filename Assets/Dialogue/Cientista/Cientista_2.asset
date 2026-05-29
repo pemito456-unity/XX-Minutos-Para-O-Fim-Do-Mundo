@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f3c2a1b9e4d5647a8b9c0d1e2f3a4b5, type: 3}
+  m_Name: Cientista_2
+  m_EditorClassIdentifier: Assembly-CSharp::ScientistConversationData
+  speakerName: Cientista
+  speakerPortrait: {fileID: -3115044460567940278, guid: 10e559fa91a58d34b8ecc16d6b2896cc, type: 3}
+  timeToDecidePerResponse: 15
+  advancesInvestigationOnComplete: 1
+  exchanges:
+  - scientistLine: "General, recebemos an\xE1lises preliminares dos locais de impacto.
+      Richmond, Virginia foi significantemente destru\xEDda. Estimam um impacto de
+      10 megatons. Conclu\xEDmos que se trata de uma ogiva nuclear."
+    playerResponse:
+      buttonText: "E quanto \xE0s leituras de radia\xE7\xE3o?"
+      pressureChange: 0
+      advancesInvestigation: 1
+  - scientistLine: "...n\xE3o foram feitas, senhor. Apenas sobrevoamos a \xE1rea
+      com ca\xE7as."
+    playerResponse:
+      buttonText: "Inaceit\xE1vel! Fale comigo apenas quando obtiver leituras precisas.
+        French desligando."
+      pressureChange: 0
+      advancesInvestigation: 1
+  closingScientistLine: 
+  dialogueStartClip: {fileID: 0}

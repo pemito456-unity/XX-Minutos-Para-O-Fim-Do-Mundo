@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f3c2a1b9e4d5647a8b9c0d1e2f3a4b5, type: 3}
+  m_Name: Cientista_4
+  m_EditorClassIdentifier: Assembly-CSharp::ScientistConversationData
+  speakerName: Cientista
+  speakerPortrait: {fileID: -3115044460567940278, guid: 10e559fa91a58d34b8ecc16d6b2896cc, type: 3}
+  timeToDecidePerResponse: 15
+  advancesInvestigationOnComplete: 1
+  exchanges:
+  - scientistLine: "Senhor, sob suas ordens, os ca\xE7as fizeram um segundo reconhecimento.
+      Os locais ao redor do epicentro cont\xE9m quantidades negligenci\xE1veis de
+      materiais radioativos."
+    playerResponse:
+      buttonText: "Quais s\xE3o os materiais presentes?"
+      pressureChange: 0
+      advancesInvestigation: 1
+  - scientistLine: "S\xE3o radioativos, senhor. Isto \xE9 evid\xEAncia irrefut\xE1vel
+      de um ataque nuclear!"
+    playerResponse:
+      buttonText: "Isto \xE9 evid\xEAncia irrefut\xE1vel que estou falando com um
+        bando de incompetentes. Doutor Voss, o senhor \xE9 doutor em qu\xEA?"
+      pressureChange: 0
+      advancesInvestigation: 1
+  - scientistLine: "Ci\xEAncias pol\xEDticas, senhor."
+    playerResponse:
+      buttonText: Faz sentido. Identifique imediatamente os materiais presentes.
+        Outra coisa - quero falar com o chefe do departamento de astronomia. French
+        desligando.
+      pressureChange: 0
+      advancesInvestigation: 1
+  closingScientistLine: 
+  dialogueStartClip: {fileID: 0}

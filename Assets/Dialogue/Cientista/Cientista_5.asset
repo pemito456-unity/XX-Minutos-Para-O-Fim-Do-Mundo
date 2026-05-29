@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f3c2a1b9e4d5647a8b9c0d1e2f3a4b5, type: 3}
+  m_Name: Cientista_5
+  m_EditorClassIdentifier: Assembly-CSharp::ScientistConversationData
+  speakerName: Rasheed
+  speakerPortrait: {fileID: 0}
+  timeToDecidePerResponse: 15
+  advancesInvestigationOnComplete: 1
+  exchanges:
+  - scientistLine: "Namast\xEA, senhor French. O doutor Voss disse que o senhor pediu
+      para falar comigo?"
+    playerResponse:
+      buttonText: "uhm... sim. \xC9 que as evid\xEAncias acerca destes ataques s\xE3o
+        muito estranhas. Precisava falar com algu\xE9m que entendesse dos cosmos
+        para me tirar umas d\xFAvidas."
+      pressureChange: 0
+      advancesInvestigation: 1
+  - scientistLine: "Senhor French, mesmo uma pessoa de tanta f\xE9 como eu n\xE3o
+      acharia que os desastres acontecendo agora tenham rela\xE7\xE3o com a influ\xEAncia
+      do Zod\xEDaco."
+    playerResponse:
+      buttonText: "...Zod\xEDaco?"
+      pressureChange: 0
+      advancesInvestigation: 1
+  - scientistLine: "Desculpe, onde est\xE1 minha educa\xE7\xE3o? Sou Rasheed Samilama,
+      chefe do departamento de astrologia."
+    playerResponse:
+      buttonText: "Diga aquele idiota do Voss que eu pedi o chefe de astronomia,
+        n\xE3o astrologia."
+      pressureChange: 0
+      advancesInvestigation: 1
+  closingScientistLine: "Ora, pois. O que posso dizer? Merc\xFArio retr\xF3grado
+    traz erros de comunica\xE7\xE3o."
+  dialogueStartClip: {fileID: 0}
