@@ -392,7 +392,8 @@ public class DialogueUITest : MonoBehaviour
                 return new PendingPhoneCall { Standard = random };
             }
         }
-        
+        Debug.Log("SCIENTIST INDEX: "+currentScientistIndex);
+        Debug.Log("Scientist count: "+ scientistConversations.Count);
         if (currentScientistIndex >= scientistConversations.Count && scientistConversations.Count > 0)
         {
             Debug.Log("VITÓRIA!");
@@ -415,7 +416,8 @@ public class DialogueUITest : MonoBehaviour
         
         if (availableDialogues.Count == 0) return null;
         
-        return availableDialogues[Random.Range(0, availableDialogues.Count)];
+        return availableDialogues[Random.Range(0, 0)];
+        //return availableDialogues[Random.Range(0, availableDialogues.Count)];
     }
     
     void StartRinging()

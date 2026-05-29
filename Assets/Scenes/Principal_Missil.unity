@@ -3618,7 +3618,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0.8352942, g: 0.9294118, b: 0.9686275, a: 1}
@@ -4957,6 +4957,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ad014f11bfbe9a04ab869f78628b22b1, type: 2}
   - {fileID: 11400000, guid: 36a5d19101b87fa43b30a95b61d404b9, type: 2}
   - {fileID: 11400000, guid: 4c0d89b3ef5054a41bc529dffafd0c6a, type: 2}
+  - {fileID: 11400000, guid: b1f343b0e0ed2124187e1834aa9cc036, type: 2}
   scientistConversations:
   - {fileID: 11400000, guid: 693ed1f03cc056143980e3c743d23874, type: 2}
   - {fileID: 11400000, guid: ef9481b969ee53b4a92e1bfbbb675540, type: 2}
@@ -5489,12 +5490,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 9
+  m_fontSize: 12
   m_fontSizeBase: 9
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 7
+  m_fontSizeMax: 12
   m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512

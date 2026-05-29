@@ -164,9 +164,10 @@ public class GameController_Def : MonoBehaviour
         currentInvestigationProgress++;
         Debug.Log($"Investigação: {currentInvestigationProgress}/{requiredInvestigationProgress}");
         
+        Debug.Log("currentInvestigationProgress: " + currentInvestigationProgress);
+        Debug.Log("requiredInvestigationProgress: " + requiredInvestigationProgress);   
         if (currentInvestigationProgress >= requiredInvestigationProgress)
         {
-            TriggerVictory();
         }
     }
     
