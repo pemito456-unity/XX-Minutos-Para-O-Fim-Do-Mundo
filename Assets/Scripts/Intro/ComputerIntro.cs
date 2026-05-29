@@ -144,7 +144,7 @@ public class ComputerIntro : MonoBehaviour
         {
             Debug.LogWarning("Fonte VT232 não atribuída! Usando fonte padrão TMP.");
         }
-        computerText.fontSize = 38;
+        computerText.fontSize = 42;
         computerText.color = new Color(0, 0.9f, 0);
         computerText.alignment = TextAlignmentOptions.TopLeft;
         computerText.enableWordWrapping = true;

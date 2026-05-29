@@ -4884,7 +4884,7 @@ MonoBehaviour:
   Ypadding: 0.5
   areaBounds: {fileID: 0}
   spawnY: 3
-  initialSpawnDelay: 2.3
+  initialSpawnDelay: 1.5
   finalSpawnDelay: 0.8
   difficultyCurve:
     serializedVersion: 2
