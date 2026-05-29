@@ -1205,7 +1205,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 635, y: 491.1}
+  m_AnchoredPosition: {x: 635, y: 484.4}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &670365399
@@ -5291,10 +5291,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 129573673}
     m_Modifications:
-    - target: {fileID: 2934063643605600020, guid: a992c272e8ed6e74b9b438bfee1c3d4d, type: 3}
-      propertyPath: m_SortingOrder
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3270520797142863719, guid: a992c272e8ed6e74b9b438bfee1c3d4d, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.12
@@ -5335,21 +5331,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5564988837545342138, guid: a992c272e8ed6e74b9b438bfee1c3d4d, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 10.98
-      objectReference: {fileID: 0}
     - target: {fileID: 6501459528752047175, guid: a992c272e8ed6e74b9b438bfee1c3d4d, type: 3}
       propertyPath: m_Name
       value: MissileLauncher
-      objectReference: {fileID: 0}
-    - target: {fileID: 6629521563949414247, guid: a992c272e8ed6e74b9b438bfee1c3d4d, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: -2037786858167355264, guid: 82d8149e7c231574cabaa0d18ae5b146, type: 3}
-    - target: {fileID: 6629521563949414247, guid: a992c272e8ed6e74b9b438bfee1c3d4d, type: 3}
-      propertyPath: m_SortingOrder
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
