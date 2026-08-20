@@ -33,9 +33,27 @@ public class MenuController : MonoBehaviour
     {
         GarantirAudioSources();
         ResolverReferencias();
-        MostrarPainelPrincipal();
+        
+        // 1. Primeiro configuramos os comportamentos e o visual dos botões
         ConfigurarBotoes();
+        AplicarHoverBotoes();
+        
+        // 2. Depois ativamos/desativamos os painéis corretos
+        MostrarPainelPrincipal();
+        
+        // 3. Forçamos a Unity a desmarcar qualquer botão focado automaticamente na inicialização
+        CorrigirFocoInicial();
+
         PlayBackgroundMusic();
+    }
+
+    // Método auxiliar para evitar o "hover invertido" por autofoco da Unity
+    void CorrigirFocoInicial()
+    {
+        if (UnityEngine.EventSystems.EventSystem.current != null)
+        {
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+        }
     }
 
     void OnDestroy()
@@ -52,7 +70,7 @@ public class MenuController : MonoBehaviour
         if (botaoJogar == null)
             botaoJogar = EncontrarBotao("ButtonPlay");
         if (botaoSair == null)
-            botaoSair = EncontrarBotao("ButtonExit");
+            botaoSair = EncontrarBotao("ButtonQuit");
 
         if (imagemPainelCreditos == null && painelCreditos != null)
         {
@@ -87,6 +105,15 @@ public class MenuController : MonoBehaviour
             PlayButtonClickSound();
             acao();
         });
+    }
+
+    // 🔴 APLICA O MESMO HOVER DOS BOTÕES DE DIÁLOGO
+    void AplicarHoverBotoes()
+    {
+        DialogueButtonStyling.ApplyChoiceButtonHover(botaoJogar);
+        DialogueButtonStyling.ApplyChoiceButtonHover(botaoCreditos);
+        DialogueButtonStyling.ApplyChoiceButtonHover(botaoSair);
+        DialogueButtonStyling.ApplyChoiceButtonHover(botaoVoltarCreditos);
     }
 
     void Update()

@@ -20,7 +20,7 @@ public class DialogueUITest : MonoBehaviour
     [SerializeField] private List<ScientistConversationData> scientistConversations;
     
     [Header("Primeiro Diálogo (Obrigatório)")]
-    [SerializeField] private DialogueData primeiroDialogo; // 🔴 ARRASTE O "Primeiro_secretário" AQUI
+    [SerializeField] private DialogueData primeiroDialogo;
     
     [Header("UI")]
     [SerializeField] private GameObject dialoguePanel;
@@ -28,7 +28,7 @@ public class DialogueUITest : MonoBehaviour
     [SerializeField] private TMPro.TextMeshProUGUI speakerNameText;
     [SerializeField] private TMPro.TextMeshProUGUI dialogueText;
     
-    [Header("Botões Manuais (arraste os botões aqui)")]
+    [Header("Botões Manuais")]
     [SerializeField] private Button choiceButton1;
     [SerializeField] private Button choiceButton2;
     [SerializeField] private Button choiceButton3;
@@ -58,7 +58,6 @@ public class DialogueUITest : MonoBehaviour
     {
         public DialogueData Standard;
         public ScientistConversationData Scientist;
-
         public bool IsScientist => Scientist != null;
     }
 
@@ -85,7 +84,7 @@ public class DialogueUITest : MonoBehaviour
     private int randomCallsSinceLastScientist = 0;
     private const int RANDOM_BETWEEN_SCIENTISTS = 2;
     
-    private bool primeiroDialogoRealizado = false; // 🔴 CONTROLE DO PRIMEIRO DIÁLOGO
+    private bool primeiroDialogoRealizado = false;
     
     private GameObject flashObject;
     private Image flashImage;
@@ -352,7 +351,6 @@ public class DialogueUITest : MonoBehaviour
     
     PendingPhoneCall GetNextScheduledPhoneCall()
     {
-        // 🔴 VERIFICA SE O PRIMEIRO DIÁLOGO AINDA NÃO FOI REALIZADO
         if (!primeiroDialogoRealizado && primeiroDialogo != null)
         {
             primeiroDialogoRealizado = true;
@@ -392,8 +390,7 @@ public class DialogueUITest : MonoBehaviour
                 return new PendingPhoneCall { Standard = random };
             }
         }
-        Debug.Log("SCIENTIST INDEX: "+currentScientistIndex);
-        Debug.Log("Scientist count: "+ scientistConversations.Count);
+        
         if (currentScientistIndex >= scientistConversations.Count && scientistConversations.Count > 0)
         {
             Debug.Log("VITÓRIA!");
@@ -408,6 +405,7 @@ public class DialogueUITest : MonoBehaviour
             : default;
     }
     
+    // 🔴 CORRIGIDO: agora escolhe um diálogo aleatório da lista
     DialogueData GetRandomNonScientistDialogue()
     {
         List<DialogueData> availableDialogues = new List<DialogueData>();
@@ -416,8 +414,7 @@ public class DialogueUITest : MonoBehaviour
         
         if (availableDialogues.Count == 0) return null;
         
-        return availableDialogues[Random.Range(0, 0)];
-        //return availableDialogues[Random.Range(0, availableDialogues.Count)];
+        return availableDialogues[Random.Range(0, availableDialogues.Count)];
     }
     
     void StartRinging()
@@ -941,9 +938,6 @@ public class DialogueUITest : MonoBehaviour
         hasActiveDialogueCall = false;
         activeDialogueCall = default;
         ClearIncomingCall();
-        
-        // 🔴 NÃO RESETA O primeiroDialogoRealizado
-        // primeiroDialogoRealizado = false; ← Não fazer isso para não repetir o primeiro diálogo
         
         if (phoneAudioSource != null && phoneAudioSource.isPlaying)
         {

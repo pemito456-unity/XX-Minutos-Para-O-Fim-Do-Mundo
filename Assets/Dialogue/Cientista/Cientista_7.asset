@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Cientista_7
   m_EditorClassIdentifier: Assembly-CSharp::ScientistConversationData
   speakerName: Armstrong
-  speakerPortrait: {fileID: 0}
+  speakerPortrait: {fileID: -6201435598855776564, guid: 7276b97a10977ed4fa4a22a5cb1a6cb0, type: 3}
   timeToDecidePerResponse: 15
   advancesInvestigationOnComplete: 1
   exchanges:
